@@ -1,0 +1,298 @@
+# PIPELINE DEFINITION
+# Name: my-pipeline
+# Description: My ML pipeline.
+# Inputs:
+#    docker_image: str
+components:
+  comp-build-docker-image:
+    executorLabel: exec-build-docker-image
+    inputDefinitions:
+      artifacts:
+        model_path:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+      parameters:
+        docker_image:
+          parameterType: STRING
+  comp-prepare-data:
+    executorLabel: exec-prepare-data
+    outputDefinitions:
+      artifacts:
+        output_csv:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+  comp-train-test-split:
+    executorLabel: exec-train-test-split
+    inputDefinitions:
+      artifacts:
+        input_csv:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+    outputDefinitions:
+      artifacts:
+        output_dir:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+  comp-training-basic-classifier:
+    executorLabel: exec-training-basic-classifier
+    inputDefinitions:
+      artifacts:
+        input_dir:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+    outputDefinitions:
+      artifacts:
+        model_output:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+deploymentSpec:
+  executors:
+    exec-build-docker-image:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - build_docker_image
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'docker' 'requests'\
+          \ && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef build_docker_image(model_path: dsl.Input[dsl.Artifact], docker_image:\
+          \ str):\n    import os\n    import docker\n    def get_service_file():\n\
+          \        service_file_content = f\"\"\"import pickle\n        from flask\
+          \ import Flask, request, jsonify\n\n        app = Flask(__name__)\n\n  \
+          \      with open('model.pkl', 'rb') as f:\n            model = pickle.load(f)\n\
+          \n\n        @app.route('/predict', methods=['POST'])\n        def predict():\n\
+          \            data = request.get_json()\n            prediction = model.predict([data['features']])\n\
+          \            return jsonify(prediction=prediction.tolist())\n\n    if __name__\
+          \ == '__main__':\n        app.run(host='0.0.0.0', port=8080)\"\"\"\n   \
+          \     return service_file_content\n\n    def get_dockerfile(model_file,\
+          \ service_file_path):\n        dockerfile_content = f\"\"\"\n          \
+          \  FROM python:3.9\n            COPY {os.path.basename(model_file)} /app/model.pkl\n\
+          \            RUN pip install scikit-learn flask\n            COPY {os.path.basename(service_file_path)}\
+          \ /app/service.py\n            CMD [\"python\", \"/app/service.py\"]\n \
+          \           \"\"\"\n        return dockerfile_content\n\n    # Get the model\
+          \ file path\n    model_file = os.path.join(model_path.path, 'model.pkl')\n\
+          \n    service_file_content = get_service_file()\n    service_file_path =\
+          \ os.path.join(model_path.path, 'service.py')\n    with open(service_file_path,\
+          \ 'w') as f:\n        f.write(service_file_content)\n    # Create a Dockerfile\n\
+          \    dockerfile_content = get_dockerfile(model_file, service_file_path)\n\
+          \    dockerfile_path = os.path.join(model_path.path, 'Dockerfile')\n   \
+          \ with open(dockerfile_path, 'w') as f:\n        f.write(dockerfile_content)\n\
+          \n    # Build the Docker image\n    client = docker.DockerClient(base_url=\"\
+          tcp://192.168.1.240:2375\")\n    image, logs = client.images.build(path=model_path.path,\
+          \ tag=docker_image)\n    for log in logs:\n        print(log)\n\n    # Push\
+          \ the Docker image to a registry (optional)\n    # Replace '<username>'\
+          \ and '<password>' with your Docker registry credentials\n    #registry_url\
+          \ = \"https://index.docker.io/v1/\"\n    #client.login(username='<username>',\
+          \ password='<password>', registry=registry_url)\n    #client.images.push(docker_image)\n\
+          \n"
+        image: python:3.9
+    exec-prepare-data:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - prepare_data
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
+          \ 'scikit-learn' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef prepare_data(output_csv: dsl.Output[dsl.Artifact]):\n    import\
+          \ pandas as pd\n    import os\n    from sklearn import datasets\n\n    #\
+          \ Load dataset\n    iris = datasets.load_iris()\n    df = pd.DataFrame(iris.data,\
+          \ columns=iris.feature_names)\n    df['species'] = iris.target\n\n    #\
+          \ Save the prepared data to CSV\n    df = df.dropna()\n\n    # Ensure the\
+          \ output directory exists\n    os.makedirs(output_csv.path, exist_ok=True)\n\
+          \n    output_csv_path = os.path.join(output_csv.path, 'final_df.csv')\n\
+          \    df.to_csv(output_csv_path, index=False)\n\n"
+        image: python:3.9
+    exec-train-test-split:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - train_test_split
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
+          \ 'scikit-learn' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef train_test_split(input_csv: dsl.Input[dsl.Artifact], output_dir:\
+          \ dsl.Output[dsl.Artifact]):\n    import pandas as pd\n    import numpy\
+          \ as np\n    import os\n    from sklearn.model_selection import train_test_split\n\
+          \n    # Load the prepared data\n    final_data = pd.read_csv(os.path.join(input_csv.path,\
+          \ 'final_df.csv'))\n\n    # Split the data into training and testing sets\n\
+          \    target_column = 'species'\n    X = final_data.loc[:, final_data.columns\
+          \ != target_column]\n    y = final_data.loc[:, final_data.columns == target_column]\n\
+          \n    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,\
+          \ stratify=y, random_state=47)\n\n    # Ensure the output directory exists\n\
+          \    os.makedirs(output_dir.path, exist_ok=True)\n\n    # Save the splits\
+          \ to .npy files\n    np.save(os.path.join(output_dir.path, 'X_train.npy'),\
+          \ X_train)\n    np.save(os.path.join(output_dir.path, 'X_test.npy'), X_test)\n\
+          \    np.save(os.path.join(output_dir.path, 'y_train.npy'), y_train)\n  \
+          \  np.save(os.path.join(output_dir.path, 'y_test.npy'), y_test)\n\n"
+        image: python:3.9
+    exec-training-basic-classifier:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - training_basic_classifier
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
+          \ 'scikit-learn' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef training_basic_classifier(input_dir: dsl.Input[dsl.Artifact],\
+          \ model_output: dsl.Output[dsl.Artifact]):\n    import numpy as np\n   \
+          \ import os\n    from sklearn.linear_model import LogisticRegression\n \
+          \   import pickle\n\n    # Load the training data\n    X_train = np.load(os.path.join(input_dir.path,\
+          \ 'X_train.npy'), allow_pickle=True)\n    y_train = np.load(os.path.join(input_dir.path,\
+          \ 'y_train.npy'), allow_pickle=True)\n\n    # Train the logistic regression\
+          \ classifier\n    classifier = LogisticRegression(max_iter=500)\n    classifier.fit(X_train,\
+          \ y_train)\n\n    # Ensure the output directory exists\n    os.makedirs(model_output.path,\
+          \ exist_ok=True)\n    print(model_output.path)\n    # Save the trained model\
+          \ to a pickle file\n    model_path = os.path.join(model_output.path, 'model.pkl')\n\
+          \    with open(model_path, 'wb') as f:\n        pickle.dump(classifier,\
+          \ f)\n\n"
+        image: python:3.9
+pipelineInfo:
+  description: My ML pipeline.
+  name: my-pipeline
+root:
+  dag:
+    tasks:
+      build-docker-image:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-build-docker-image
+        dependentTasks:
+        - training-basic-classifier
+        inputs:
+          artifacts:
+            model_path:
+              taskOutputArtifact:
+                outputArtifactKey: model_output
+                producerTask: training-basic-classifier
+          parameters:
+            docker_image:
+              componentInputParameter: docker_image
+        taskInfo:
+          name: build-docker-image
+      prepare-data:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-prepare-data
+        taskInfo:
+          name: prepare-data
+      train-test-split:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-train-test-split
+        dependentTasks:
+        - prepare-data
+        inputs:
+          artifacts:
+            input_csv:
+              taskOutputArtifact:
+                outputArtifactKey: output_csv
+                producerTask: prepare-data
+        taskInfo:
+          name: train-test-split
+      training-basic-classifier:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-training-basic-classifier
+        dependentTasks:
+        - train-test-split
+        inputs:
+          artifacts:
+            input_dir:
+              taskOutputArtifact:
+                outputArtifactKey: output_dir
+                producerTask: train-test-split
+        taskInfo:
+          name: training-basic-classifier
+  inputDefinitions:
+    parameters:
+      docker_image:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0

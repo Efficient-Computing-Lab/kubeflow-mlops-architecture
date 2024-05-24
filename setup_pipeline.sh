@@ -1,0 +1,1 @@
+curl -F "uploadfile=@pipeline.tar.gz" "http://0.0.0.0:8888/apis/v1beta1/pipelines/upload"

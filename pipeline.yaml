@@ -1,19 +1,67 @@
 # PIPELINE DEFINITION
 # Name: my-pipeline
 # Description: My ML pipeline.
-# Inputs:
-#    docker_image: str
 components:
-  comp-build-docker-image:
-    executorLabel: exec-build-docker-image
+  comp-createpvc:
+    executorLabel: exec-createpvc
     inputDefinitions:
-      artifacts:
-        model_path:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
       parameters:
-        docker_image:
+        access_modes:
+          description: 'AccessModes to request for the provisioned PVC. May
+
+            be one or more of ``''ReadWriteOnce''``, ``''ReadOnlyMany''``, ``''ReadWriteMany''``,
+            or
+
+            ``''ReadWriteOncePod''``. Corresponds to `PersistentVolumeClaim.spec.accessModes
+            <https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes>`_.'
+          parameterType: LIST
+        annotations:
+          description: Annotations for the PVC's metadata. Corresponds to `PersistentVolumeClaim.metadata.annotations
+            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaim>`_.
+          isOptional: true
+          parameterType: STRUCT
+        pvc_name:
+          description: 'Name of the PVC. Corresponds to `PersistentVolumeClaim.metadata.name
+            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaim>`_.
+            Only one of ``pvc_name`` and ``pvc_name_suffix`` can
+
+            be provided.'
+          isOptional: true
+          parameterType: STRING
+        pvc_name_suffix:
+          description: 'Prefix to use for a dynamically generated name, which
+
+            will take the form ``<argo-workflow-name>-<pvc_name_suffix>``. Only one
+
+            of ``pvc_name`` and ``pvc_name_suffix`` can be provided.'
+          isOptional: true
+          parameterType: STRING
+        size:
+          description: The size of storage requested by the PVC that will be provisioned.
+            For example, ``'5Gi'``. Corresponds to `PersistentVolumeClaim.spec.resources.requests.storage
+            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimSpec>`_.
+          parameterType: STRING
+        storage_class_name:
+          defaultValue: ''
+          description: 'Name of StorageClass from which to provision the PV
+
+            to back the PVC. ``None`` indicates to use the cluster''s default
+
+            storage_class_name. Set to ``''''`` for a statically specified PVC.'
+          isOptional: true
+          parameterType: STRING
+        volume_name:
+          description: 'Pre-existing PersistentVolume that should back the
+
+            provisioned PersistentVolumeClaim. Used for statically
+
+            specified PV only. Corresponds to `PersistentVolumeClaim.spec.volumeName
+            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimSpec>`_.'
+          isOptional: true
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        name:
           parameterType: STRING
   comp-prepare-data:
     executorLabel: exec-prepare-data
@@ -53,64 +101,9 @@ components:
             schemaVersion: 0.0.1
 deploymentSpec:
   executors:
-    exec-build-docker-image:
+    exec-createpvc:
       container:
-        args:
-        - --executor_input
-        - '{{$}}'
-        - --function_to_execute
-        - build_docker_image
-        command:
-        - sh
-        - -c
-        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
-          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
-          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
-          \  python3 -m pip install --quiet --no-warn-script-location 'docker' 'requests'\
-          \ && \"$0\" \"$@\"\n"
-        - sh
-        - -ec
-        - 'program_path=$(mktemp -d)
-
-
-          printf "%s" "$0" > "$program_path/ephemeral_component.py"
-
-          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
-
-          '
-        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef build_docker_image(model_path: dsl.Input[dsl.Artifact], docker_image:\
-          \ str):\n    import os\n    import docker\n    def get_service_file():\n\
-          \        service_file_content = f\"\"\"import pickle\n        from flask\
-          \ import Flask, request, jsonify\n\n        app = Flask(__name__)\n\n  \
-          \      with open('model.pkl', 'rb') as f:\n            model = pickle.load(f)\n\
-          \n\n        @app.route('/predict', methods=['POST'])\n        def predict():\n\
-          \            data = request.get_json()\n            prediction = model.predict([data['features']])\n\
-          \            return jsonify(prediction=prediction.tolist())\n\n    if __name__\
-          \ == '__main__':\n        app.run(host='0.0.0.0', port=8080)\"\"\"\n   \
-          \     return service_file_content\n\n    def get_dockerfile(model_file,\
-          \ service_file_path):\n        dockerfile_content = f\"\"\"\n          \
-          \  FROM python:3.9\n            COPY {os.path.basename(model_file)} /app/model.pkl\n\
-          \            RUN pip install scikit-learn flask\n            COPY {os.path.basename(service_file_path)}\
-          \ /app/service.py\n            CMD [\"python\", \"/app/service.py\"]\n \
-          \           \"\"\"\n        return dockerfile_content\n\n    # Get the model\
-          \ file path\n    model_file = os.path.join(model_path.path, 'model.pkl')\n\
-          \n    service_file_content = get_service_file()\n    service_file_path =\
-          \ os.path.join(model_path.path, 'service.py')\n    with open(service_file_path,\
-          \ 'w') as f:\n        f.write(service_file_content)\n    # Create a Dockerfile\n\
-          \    dockerfile_content = get_dockerfile(model_file, service_file_path)\n\
-          \    dockerfile_path = os.path.join(model_path.path, 'Dockerfile')\n   \
-          \ with open(dockerfile_path, 'w') as f:\n        f.write(dockerfile_content)\n\
-          \n    # Build the Docker image\n    client = docker.DockerClient(base_url=\"\
-          tcp://192.168.1.240:2375\")\n    image, logs = client.images.build(path=model_path.path,\
-          \ tag=docker_image)\n    for log in logs:\n        print(log)\n\n    # Push\
-          \ the Docker image to a registry (optional)\n    # Replace '<username>'\
-          \ and '<password>' with your Docker registry credentials\n    #registry_url\
-          \ = \"https://index.docker.io/v1/\"\n    #client.login(username='<username>',\
-          \ password='<password>', registry=registry_url)\n    #client.images.push(docker_image)\n\
-          \n"
-        image: python:3.9
+        image: argostub/createpvc
     exec-prepare-data:
       container:
         args:
@@ -226,7 +219,7 @@ deploymentSpec:
           \ y_train)\n\n    # Ensure the output directory exists\n    os.makedirs(model_output.path,\
           \ exist_ok=True)\n    print(model_output.path)\n    # Save the trained model\
           \ to a pickle file\n    model_path = os.path.join(model_output.path, 'model.pkl')\n\
-          \    with open(model_path, 'wb') as f:\n        pickle.dump(classifier,\
+          \    with open('/trained_model/model.pkl', 'wb') as f:\n        pickle.dump(classifier,\
           \ f)\n\n"
         image: python:3.9
 pipelineInfo:
@@ -235,24 +228,28 @@ pipelineInfo:
 root:
   dag:
     tasks:
-      build-docker-image:
+      createpvc:
         cachingOptions:
           enableCache: true
         componentRef:
-          name: comp-build-docker-image
-        dependentTasks:
-        - training-basic-classifier
+          name: comp-createpvc
         inputs:
-          artifacts:
-            model_path:
-              taskOutputArtifact:
-                outputArtifactKey: model_output
-                producerTask: training-basic-classifier
           parameters:
-            docker_image:
-              componentInputParameter: docker_image
+            access_modes:
+              runtimeValue:
+                constant:
+                - ReadWriteOnce
+            pvc_name:
+              runtimeValue:
+                constant: trained-model-v3
+            size:
+              runtimeValue:
+                constant: 5Gi
+            storage_class_name:
+              runtimeValue:
+                constant: local-path
         taskInfo:
-          name: build-docker-image
+          name: createpvc
       prepare-data:
         cachingOptions:
           enableCache: true
@@ -281,6 +278,7 @@ root:
         componentRef:
           name: comp-training-basic-classifier
         dependentTasks:
+        - createpvc
         - train-test-split
         inputs:
           artifacts:
@@ -290,9 +288,16 @@ root:
                 producerTask: train-test-split
         taskInfo:
           name: training-basic-classifier
-  inputDefinitions:
-    parameters:
-      docker_image:
-        parameterType: STRING
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.7.0
+---
+platforms:
+  kubernetes:
+    deploymentSpec:
+      executors:
+        exec-training-basic-classifier:
+          pvcMount:
+          - mountPath: /trained_model
+            taskOutputParameter:
+              outputParameterKey: name
+              producerTask: createpvc

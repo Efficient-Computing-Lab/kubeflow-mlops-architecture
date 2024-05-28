@@ -1,5 +1,6 @@
 from kfp import dsl, compiler
 from kfp.dsl import component, pipeline
+from kfp import kubernetes
 import tarfile
 import os
 import kfp
@@ -85,84 +86,25 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
     print(model_output.path)
     # Save the trained model to a pickle file
     model_path = os.path.join(model_output.path, 'model.pkl')
-    with open(model_path, 'wb') as f:
+    with open('/trained_model/model.pkl', 'wb') as f:
         pickle.dump(classifier, f)
-
-
-@component(
-    packages_to_install=["docker", "requests"],
-    base_image="python:3.9",
-)
-def build_docker_image(model_path: dsl.Input[dsl.Artifact], docker_image: str):
-    import os
-    import docker
-    def get_service_file():
-        service_file_content = f"""import pickle
-        from flask import Flask, request, jsonify
-
-        app = Flask(__name__)
-
-        with open('model.pkl', 'rb') as f:
-            model = pickle.load(f)
-
-
-        @app.route('/predict', methods=['POST'])
-        def predict():
-            data = request.get_json()
-            prediction = model.predict([data['features']])
-            return jsonify(prediction=prediction.tolist())
-
-    if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=8080)"""
-        return service_file_content
-
-    def get_dockerfile(model_file, service_file_path):
-        dockerfile_content = f"""
-            FROM python:3.9
-            COPY {os.path.basename(model_file)} /app/model.pkl
-            RUN pip install scikit-learn flask
-            COPY {os.path.basename(service_file_path)} /app/service.py
-            CMD ["python", "/app/service.py"]
-            """
-        return dockerfile_content
-
-    # Get the model file path
-    model_file = os.path.join(model_path.path, 'model.pkl')
-
-    service_file_content = get_service_file()
-    service_file_path = os.path.join(model_path.path, 'service.py')
-    with open(service_file_path, 'w') as f:
-        f.write(service_file_content)
-    # Create a Dockerfile
-    dockerfile_content = get_dockerfile(model_file, service_file_path)
-    dockerfile_path = os.path.join(model_path.path, 'Dockerfile')
-    with open(dockerfile_path, 'w') as f:
-        f.write(dockerfile_content)
-
-    # Build the Docker image
-    client = docker.DockerClient(base_url="tcp://192.168.1.240:2375")
-    image, logs = client.images.build(path=model_path.path, tag=docker_image)
-    for log in logs:
-        print(log)
-
-    # Push the Docker image to a registry (optional)
-    # Replace '<username>' and '<password>' with your Docker registry credentials
-    #registry_url = "https://index.docker.io/v1/"
-    #client.login(username='<username>', password='<password>', registry=registry_url)
-    #client.images.push(docker_image)
 
 
 # Define the pipeline
 @pipeline
-def my_pipeline(docker_image: str):
+def my_pipeline():
     """My ML pipeline."""
+    pvc1 = kubernetes.CreatePVC(
+        # can also use pvc_name instead of pvc_name_suffix to use a pre-existing PVC
+        pvc_name='trained-model-v3',
+        access_modes=['ReadWriteOnce'],
+        size='5Gi',
+        storage_class_name='local-path',
+    )
     prepare_data_task = prepare_data()
     train_test_split_task = train_test_split(input_csv=prepare_data_task.outputs['output_csv'])
     training_task = training_basic_classifier(input_dir=train_test_split_task.outputs['output_dir'])
-    build_docker_image(
-        model_path=training_task.outputs['model_output'],
-        docker_image=docker_image,
-    )
+    kubernetes.mount_pvc(training_task, pvc_name=pvc1.outputs['name'], mount_path='/trained_model')
 
 
 # Compile the pipeline
@@ -173,7 +115,9 @@ with tarfile.open("pipeline.tar.gz", "w:gz") as tar:
     tar.add("pipeline.yaml", arcname=os.path.basename("pipeline.yaml"))
 
 # Upload and run the pipeline
-client = kfp.Client(host="http://192.168.1.240:3001")
-client.upload_pipeline_version(pipeline_name='test', pipeline_version_name='v21',
+client = kfp.Client(host="http://10.100.54.195:3001")
+client.set_user_namespace("test")
+#client.upload_pipeline(pipeline_name='test',
+#                       pipeline_package_path='pipeline.tar.gz')
+client.upload_pipeline_version(pipeline_name='test', pipeline_version_name='v43',
                                pipeline_package_path='pipeline.tar.gz')
-pipeline_id = client.get_pipeline_id('test')

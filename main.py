@@ -86,7 +86,7 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
     print(model_output.path)
     # Save the trained model to a pickle file
     model_path = os.path.join(model_output.path, 'model.pkl')
-    with open('/trained_model/model.pkl', 'wb') as f:
+    with open('/trained_models/model.v2.pkl', 'wb') as f:
         pickle.dump(classifier, f)
 
 
@@ -94,17 +94,10 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
 @pipeline
 def my_pipeline():
     """My ML pipeline."""
-    pvc1 = kubernetes.CreatePVC(
-        # can also use pvc_name instead of pvc_name_suffix to use a pre-existing PVC
-        pvc_name='trained-model-v3',
-        access_modes=['ReadWriteOnce'],
-        size='5Gi',
-        storage_class_name='local-path',
-    )
     prepare_data_task = prepare_data()
     train_test_split_task = train_test_split(input_csv=prepare_data_task.outputs['output_csv'])
     training_task = training_basic_classifier(input_dir=train_test_split_task.outputs['output_dir'])
-    kubernetes.mount_pvc(training_task, pvc_name=pvc1.outputs['name'], mount_path='/trained_model')
+    kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path='/trained_models')
 
 
 # Compile the pipeline
@@ -115,9 +108,9 @@ with tarfile.open("pipeline.tar.gz", "w:gz") as tar:
     tar.add("pipeline.yaml", arcname=os.path.basename("pipeline.yaml"))
 
 # Upload and run the pipeline
-client = kfp.Client(host="http://10.100.54.195:3001")
+client = kfp.Client(host="http://10.43.196.73:3001")
 client.set_user_namespace("test")
 #client.upload_pipeline(pipeline_name='test',
 #                       pipeline_package_path='pipeline.tar.gz')
-client.upload_pipeline_version(pipeline_name='test', pipeline_version_name='v43',
+client.upload_pipeline_version(pipeline_name='test', pipeline_version_name='v6',
                                pipeline_package_path='pipeline.tar.gz')

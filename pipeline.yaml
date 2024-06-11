@@ -2,67 +2,6 @@
 # Name: my-pipeline
 # Description: My ML pipeline.
 components:
-  comp-createpvc:
-    executorLabel: exec-createpvc
-    inputDefinitions:
-      parameters:
-        access_modes:
-          description: 'AccessModes to request for the provisioned PVC. May
-
-            be one or more of ``''ReadWriteOnce''``, ``''ReadOnlyMany''``, ``''ReadWriteMany''``,
-            or
-
-            ``''ReadWriteOncePod''``. Corresponds to `PersistentVolumeClaim.spec.accessModes
-            <https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes>`_.'
-          parameterType: LIST
-        annotations:
-          description: Annotations for the PVC's metadata. Corresponds to `PersistentVolumeClaim.metadata.annotations
-            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaim>`_.
-          isOptional: true
-          parameterType: STRUCT
-        pvc_name:
-          description: 'Name of the PVC. Corresponds to `PersistentVolumeClaim.metadata.name
-            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaim>`_.
-            Only one of ``pvc_name`` and ``pvc_name_suffix`` can
-
-            be provided.'
-          isOptional: true
-          parameterType: STRING
-        pvc_name_suffix:
-          description: 'Prefix to use for a dynamically generated name, which
-
-            will take the form ``<argo-workflow-name>-<pvc_name_suffix>``. Only one
-
-            of ``pvc_name`` and ``pvc_name_suffix`` can be provided.'
-          isOptional: true
-          parameterType: STRING
-        size:
-          description: The size of storage requested by the PVC that will be provisioned.
-            For example, ``'5Gi'``. Corresponds to `PersistentVolumeClaim.spec.resources.requests.storage
-            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimSpec>`_.
-          parameterType: STRING
-        storage_class_name:
-          defaultValue: ''
-          description: 'Name of StorageClass from which to provision the PV
-
-            to back the PVC. ``None`` indicates to use the cluster''s default
-
-            storage_class_name. Set to ``''''`` for a statically specified PVC.'
-          isOptional: true
-          parameterType: STRING
-        volume_name:
-          description: 'Pre-existing PersistentVolume that should back the
-
-            provisioned PersistentVolumeClaim. Used for statically
-
-            specified PV only. Corresponds to `PersistentVolumeClaim.spec.volumeName
-            <https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/#PersistentVolumeClaimSpec>`_.'
-          isOptional: true
-          parameterType: STRING
-    outputDefinitions:
-      parameters:
-        name:
-          parameterType: STRING
   comp-prepare-data:
     executorLabel: exec-prepare-data
     outputDefinitions:
@@ -101,9 +40,6 @@ components:
             schemaVersion: 0.0.1
 deploymentSpec:
   executors:
-    exec-createpvc:
-      container:
-        image: argostub/createpvc
     exec-prepare-data:
       container:
         args:
@@ -219,7 +155,7 @@ deploymentSpec:
           \ y_train)\n\n    # Ensure the output directory exists\n    os.makedirs(model_output.path,\
           \ exist_ok=True)\n    print(model_output.path)\n    # Save the trained model\
           \ to a pickle file\n    model_path = os.path.join(model_output.path, 'model.pkl')\n\
-          \    with open('/trained_model/model.pkl', 'wb') as f:\n        pickle.dump(classifier,\
+          \    with open('/trained_models/model.v2.pkl', 'wb') as f:\n        pickle.dump(classifier,\
           \ f)\n\n"
         image: python:3.9
 pipelineInfo:
@@ -228,28 +164,6 @@ pipelineInfo:
 root:
   dag:
     tasks:
-      createpvc:
-        cachingOptions:
-          enableCache: true
-        componentRef:
-          name: comp-createpvc
-        inputs:
-          parameters:
-            access_modes:
-              runtimeValue:
-                constant:
-                - ReadWriteOnce
-            pvc_name:
-              runtimeValue:
-                constant: trained-model-v3
-            size:
-              runtimeValue:
-                constant: 5Gi
-            storage_class_name:
-              runtimeValue:
-                constant: local-path
-        taskInfo:
-          name: createpvc
       prepare-data:
         cachingOptions:
           enableCache: true
@@ -278,7 +192,6 @@ root:
         componentRef:
           name: comp-training-basic-classifier
         dependentTasks:
-        - createpvc
         - train-test-split
         inputs:
           artifacts:
@@ -297,7 +210,5 @@ platforms:
       executors:
         exec-training-basic-classifier:
           pvcMount:
-          - mountPath: /trained_model
-            taskOutputParameter:
-              outputParameterKey: name
-              producerTask: createpvc
+          - constant: trained-models
+            mountPath: /trained_models

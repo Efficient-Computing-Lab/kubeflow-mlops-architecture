@@ -6,9 +6,10 @@ WORKDIR /app
 
 # Copy the Python script into the container
 COPY main.py .
+COPY send_file.py .
 
 # Install any dependencies if needed
-# RUN pip install ...
+RUN pip3 install requests
 
 # Run the Python script when the container starts
 CMD ["python", "main.py"]

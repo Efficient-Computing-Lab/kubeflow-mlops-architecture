@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-
+import send_file
 logging.basicConfig(level=logging.INFO)
 
 def get_file_info(directory):
@@ -36,11 +36,12 @@ def find_new_files(directory):
             logging.info("New files found:")
             for file in new_files:
                 logging.info(f"File: {os.path.join(directory, file)}, Created: {time.ctime(latest_files_info[file]['created'])}")
-        
+                send_file.readfile(os.path.join(directory, file))
         if updated_files:
             logging.info("Updated files found:")
             for file in updated_files:
                 logging.info(f"File: {os.path.join(directory, file)}, Modified: {time.ctime(latest_files_info[file]['modified'])}")
+                send_file.readfile(os.path.join(directory, file))
         
         # Update current files info
         current_files_info = latest_files_info

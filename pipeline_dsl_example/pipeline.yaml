@@ -155,7 +155,7 @@ deploymentSpec:
           \ y_train)\n\n    # Ensure the output directory exists\n    os.makedirs(model_output.path,\
           \ exist_ok=True)\n    print(model_output.path)\n    # Save the trained model\
           \ to a pickle file\n    model_path = os.path.join(model_output.path, \"\
-          model.pkl\")\n    with open(\"/trained_models/model.v3.pkl\", \"wb\") as\
+          model.pkl\")\n    with open(\"/trained_models/model.v7.pkl\", \"wb\") as\
           \ f:\n        pickle.dump(classifier, f)\n\n"
         image: python:3.9
 pipelineInfo:

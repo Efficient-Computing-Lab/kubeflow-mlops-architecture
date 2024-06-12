@@ -86,7 +86,7 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
     print(model_output.path)
     # Save the trained model to a pickle file
     model_path = os.path.join(model_output.path, "model.pkl")
-    with open("/trained_models/model.v3.pkl", "wb") as f:
+    with open("/trained_models/model.v7.pkl", "wb") as f:
         pickle.dump(classifier, f)
 
 
@@ -98,7 +98,7 @@ def my_pipeline():
     train_test_split_task = train_test_split(input_csv=prepare_data_task.outputs["output_csv"])
     training_task = training_basic_classifier(input_dir=train_test_split_task.outputs["output_dir"])
     kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path="/trained_models")
-
+    
 
 # Compile the pipeline
 compiler.Compiler().compile(my_pipeline, package_path="pipeline.yaml")
@@ -117,10 +117,13 @@ defined_job_name = "training_job"
 if not id:
     client.upload_pipeline(pipeline_name="test",
                         pipeline_package_path="pipeline.tar.gz")
-    client.run_pipeline(pipeline_package_path="pipeline.tar.gz", experiment_id=retrieved_experiment_id, job_name=defined_job_name)
+    running_pipeline = client.run_pipeline(pipeline_package_path="pipeline.tar.gz", experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)
+    client.wait_for_run_completion(run_id=running_pipeline.run_id,timeout=500,sleep_duration=5)
+    client.delete_run(run_id=running_pipeline.run_id)
 else:
-    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v37",
+    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v62",
                                 pipeline_package_path="pipeline.tar.gz")
     retrieved_version_id = running_version.pipeline_version_id
-    client.run_pipeline(pipeline_id=str(retrieved_pipeline_id), version_id=str(retrieved_version_id), experiment_id=str(retrieved_experiment_id), job_name=str(defined_job_name))
-
+    running_pipeline = client.run_pipeline(pipeline_id=retrieved_pipeline_id, version_id=retrieved_version_id, experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)
+    client.wait_for_run_completion(run_id=running_pipeline.run_id,timeout=500,sleep_duration=5)
+    client.delete_run(run_id=running_pipeline.run_id)

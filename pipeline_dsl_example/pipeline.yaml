@@ -70,10 +70,10 @@ deploymentSpec:
           \ *\n\ndef prepare_data(output_csv: dsl.Output[dsl.Artifact]):\n    import\
           \ pandas as pd\n    import os\n    from sklearn import datasets\n\n    #\
           \ Load dataset\n    iris = datasets.load_iris()\n    df = pd.DataFrame(iris.data,\
-          \ columns=iris.feature_names)\n    df['species'] = iris.target\n\n    #\
-          \ Save the prepared data to CSV\n    df = df.dropna()\n\n    # Ensure the\
-          \ output directory exists\n    os.makedirs(output_csv.path, exist_ok=True)\n\
-          \n    output_csv_path = os.path.join(output_csv.path, 'final_df.csv')\n\
+          \ columns=iris.feature_names)\n    df[\"species\"] = iris.target\n\n   \
+          \ # Save the prepared data to CSV\n    df = df.dropna()\n\n    # Ensure\
+          \ the output directory exists\n    os.makedirs(output_csv.path, exist_ok=True)\n\
+          \n    output_csv_path = os.path.join(output_csv.path, \"final_df.csv\")\n\
           \    df.to_csv(output_csv_path, index=False)\n\n"
         image: python:3.9
     exec-train-test-split:
@@ -107,16 +107,16 @@ deploymentSpec:
           \ dsl.Output[dsl.Artifact]):\n    import pandas as pd\n    import numpy\
           \ as np\n    import os\n    from sklearn.model_selection import train_test_split\n\
           \n    # Load the prepared data\n    final_data = pd.read_csv(os.path.join(input_csv.path,\
-          \ 'final_df.csv'))\n\n    # Split the data into training and testing sets\n\
-          \    target_column = 'species'\n    X = final_data.loc[:, final_data.columns\
+          \ \"final_df.csv\"))\n\n    # Split the data into training and testing sets\n\
+          \    target_column = \"species\"\n    X = final_data.loc[:, final_data.columns\
           \ != target_column]\n    y = final_data.loc[:, final_data.columns == target_column]\n\
           \n    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,\
           \ stratify=y, random_state=47)\n\n    # Ensure the output directory exists\n\
           \    os.makedirs(output_dir.path, exist_ok=True)\n\n    # Save the splits\
-          \ to .npy files\n    np.save(os.path.join(output_dir.path, 'X_train.npy'),\
-          \ X_train)\n    np.save(os.path.join(output_dir.path, 'X_test.npy'), X_test)\n\
-          \    np.save(os.path.join(output_dir.path, 'y_train.npy'), y_train)\n  \
-          \  np.save(os.path.join(output_dir.path, 'y_test.npy'), y_test)\n\n"
+          \ to .npy files\n    np.save(os.path.join(output_dir.path, \"X_train.npy\"\
+          ), X_train)\n    np.save(os.path.join(output_dir.path, \"X_test.npy\"),\
+          \ X_test)\n    np.save(os.path.join(output_dir.path, \"y_train.npy\"), y_train)\n\
+          \    np.save(os.path.join(output_dir.path, \"y_test.npy\"), y_test)\n\n"
         image: python:3.9
     exec-training-basic-classifier:
       container:
@@ -149,14 +149,14 @@ deploymentSpec:
           \ model_output: dsl.Output[dsl.Artifact]):\n    import numpy as np\n   \
           \ import os\n    from sklearn.linear_model import LogisticRegression\n \
           \   import pickle\n\n    # Load the training data\n    X_train = np.load(os.path.join(input_dir.path,\
-          \ 'X_train.npy'), allow_pickle=True)\n    y_train = np.load(os.path.join(input_dir.path,\
-          \ 'y_train.npy'), allow_pickle=True)\n\n    # Train the logistic regression\
+          \ \"X_train.npy\"), allow_pickle=True)\n    y_train = np.load(os.path.join(input_dir.path,\
+          \ \"y_train.npy\"), allow_pickle=True)\n\n    # Train the logistic regression\
           \ classifier\n    classifier = LogisticRegression(max_iter=500)\n    classifier.fit(X_train,\
           \ y_train)\n\n    # Ensure the output directory exists\n    os.makedirs(model_output.path,\
           \ exist_ok=True)\n    print(model_output.path)\n    # Save the trained model\
-          \ to a pickle file\n    model_path = os.path.join(model_output.path, 'model.pkl')\n\
-          \    with open('/trained_models/model.v2.pkl', 'wb') as f:\n        pickle.dump(classifier,\
-          \ f)\n\n"
+          \ to a pickle file\n    model_path = os.path.join(model_output.path, \"\
+          model.pkl\")\n    with open(\"/trained_models/model.v3.pkl\", \"wb\") as\
+          \ f:\n        pickle.dump(classifier, f)\n\n"
         image: python:3.9
 pipelineInfo:
   description: My ML pipeline.

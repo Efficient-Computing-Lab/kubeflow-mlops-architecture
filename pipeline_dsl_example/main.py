@@ -19,7 +19,7 @@ def prepare_data(output_csv: dsl.Output[dsl.Artifact]):
     # Load dataset
     iris = datasets.load_iris()
     df = pd.DataFrame(iris.data, columns=iris.feature_names)
-    df['species'] = iris.target
+    df["species"] = iris.target
 
     # Save the prepared data to CSV
     df = df.dropna()
@@ -27,7 +27,7 @@ def prepare_data(output_csv: dsl.Output[dsl.Artifact]):
     # Ensure the output directory exists
     os.makedirs(output_csv.path, exist_ok=True)
 
-    output_csv_path = os.path.join(output_csv.path, 'final_df.csv')
+    output_csv_path = os.path.join(output_csv.path, "final_df.csv")
     df.to_csv(output_csv_path, index=False)
 
 
@@ -43,10 +43,10 @@ def train_test_split(input_csv: dsl.Input[dsl.Artifact], output_dir: dsl.Output[
     from sklearn.model_selection import train_test_split
 
     # Load the prepared data
-    final_data = pd.read_csv(os.path.join(input_csv.path, 'final_df.csv'))
+    final_data = pd.read_csv(os.path.join(input_csv.path, "final_df.csv"))
 
     # Split the data into training and testing sets
-    target_column = 'species'
+    target_column = "species"
     X = final_data.loc[:, final_data.columns != target_column]
     y = final_data.loc[:, final_data.columns == target_column]
 
@@ -56,10 +56,10 @@ def train_test_split(input_csv: dsl.Input[dsl.Artifact], output_dir: dsl.Output[
     os.makedirs(output_dir.path, exist_ok=True)
 
     # Save the splits to .npy files
-    np.save(os.path.join(output_dir.path, 'X_train.npy'), X_train)
-    np.save(os.path.join(output_dir.path, 'X_test.npy'), X_test)
-    np.save(os.path.join(output_dir.path, 'y_train.npy'), y_train)
-    np.save(os.path.join(output_dir.path, 'y_test.npy'), y_test)
+    np.save(os.path.join(output_dir.path, "X_train.npy"), X_train)
+    np.save(os.path.join(output_dir.path, "X_test.npy"), X_test)
+    np.save(os.path.join(output_dir.path, "y_train.npy"), y_train)
+    np.save(os.path.join(output_dir.path, "y_test.npy"), y_test)
 
 
 # Define the training_basic_classifier component
@@ -74,8 +74,8 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
     import pickle
 
     # Load the training data
-    X_train = np.load(os.path.join(input_dir.path, 'X_train.npy'), allow_pickle=True)
-    y_train = np.load(os.path.join(input_dir.path, 'y_train.npy'), allow_pickle=True)
+    X_train = np.load(os.path.join(input_dir.path, "X_train.npy"), allow_pickle=True)
+    y_train = np.load(os.path.join(input_dir.path, "y_train.npy"), allow_pickle=True)
 
     # Train the logistic regression classifier
     classifier = LogisticRegression(max_iter=500)
@@ -85,8 +85,8 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
     os.makedirs(model_output.path, exist_ok=True)
     print(model_output.path)
     # Save the trained model to a pickle file
-    model_path = os.path.join(model_output.path, 'model.pkl')
-    with open('/trained_models/model.v2.pkl', 'wb') as f:
+    model_path = os.path.join(model_output.path, "model.pkl")
+    with open("/trained_models/model.v3.pkl", "wb") as f:
         pickle.dump(classifier, f)
 
 
@@ -95,22 +95,32 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
 def my_pipeline():
     """My ML pipeline."""
     prepare_data_task = prepare_data()
-    train_test_split_task = train_test_split(input_csv=prepare_data_task.outputs['output_csv'])
-    training_task = training_basic_classifier(input_dir=train_test_split_task.outputs['output_dir'])
-    kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path='/trained_models')
+    train_test_split_task = train_test_split(input_csv=prepare_data_task.outputs["output_csv"])
+    training_task = training_basic_classifier(input_dir=train_test_split_task.outputs["output_dir"])
+    kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path="/trained_models")
 
 
 # Compile the pipeline
-compiler.Compiler().compile(my_pipeline, package_path='pipeline.yaml')
+compiler.Compiler().compile(my_pipeline, package_path="pipeline.yaml")
 
 # Package the pipeline YAML
 with tarfile.open("pipeline.tar.gz", "w:gz") as tar:
     tar.add("pipeline.yaml", arcname=os.path.basename("pipeline.yaml"))
 
 # Upload and run the pipeline
-client = kfp.Client(host="http://10.43.196.73:3001")
+client = kfp.Client(host="http://192.168.1.240:3001")
 client.set_user_namespace("test")
-#client.upload_pipeline(pipeline_name='test',
-#                       pipeline_package_path='pipeline.tar.gz')
-client.upload_pipeline_version(pipeline_name='test', pipeline_version_name='v6',
-                               pipeline_package_path='pipeline.tar.gz')
+client.create_experiment(name="experiment_test")
+retrieved_experiment_id = client.get_experiment(experiment_name="experiment_test").experiment_id
+retrieved_pipeline_id =client.get_pipeline_id("test")
+defined_job_name = "training_job"
+if not id:
+    client.upload_pipeline(pipeline_name="test",
+                        pipeline_package_path="pipeline.tar.gz")
+    client.run_pipeline(pipeline_package_path="pipeline.tar.gz", experiment_id=retrieved_experiment_id, job_name=defined_job_name)
+else:
+    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v37",
+                                pipeline_package_path="pipeline.tar.gz")
+    retrieved_version_id = running_version.pipeline_version_id
+    client.run_pipeline(pipeline_id=str(retrieved_pipeline_id), version_id=str(retrieved_version_id), experiment_id=str(retrieved_experiment_id), job_name=str(defined_job_name))
+

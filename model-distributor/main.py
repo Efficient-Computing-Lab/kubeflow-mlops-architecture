@@ -45,9 +45,3 @@ def find_new_files(directory):
         
         # Update current files info
         current_files_info = latest_files_info
-
-# Get environment variables
-directory_path = os.environ.get('ENV_PATH', '/data')
-
-# Start finding new files
-find_new_files(directory_path)

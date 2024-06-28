@@ -133,7 +133,7 @@ deploymentSpec:
           \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
           \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
-          \ 'scikit-learn' && \"$0\" \"$@\"\n"
+          \ 'scikit-learn' 'onnx' 'skl2onnx' && \"$0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -148,15 +148,20 @@ deploymentSpec:
           \ *\n\ndef training_basic_classifier(input_dir: dsl.Input[dsl.Artifact],\
           \ model_output: dsl.Output[dsl.Artifact]):\n    import numpy as np\n   \
           \ import os\n    from sklearn.linear_model import LogisticRegression\n \
-          \   import pickle\n\n    # Load the training data\n    X_train = np.load(os.path.join(input_dir.path,\
-          \ \"X_train.npy\"), allow_pickle=True)\n    y_train = np.load(os.path.join(input_dir.path,\
-          \ \"y_train.npy\"), allow_pickle=True)\n\n    # Train the logistic regression\
-          \ classifier\n    classifier = LogisticRegression(max_iter=500)\n    classifier.fit(X_train,\
-          \ y_train)\n\n    # Ensure the output directory exists\n    os.makedirs(model_output.path,\
-          \ exist_ok=True)\n    print(model_output.path)\n    # Save the trained model\
-          \ to a pickle file\n    model_path = os.path.join(model_output.path, \"\
-          model.pkl\")\n    with open(\"/trained_models/model.v7.pkl\", \"wb\") as\
-          \ f:\n        pickle.dump(classifier, f)\n\n"
+          \   import onnx\n    import skl2onnx\n    from skl2onnx import convert_sklearn\n\
+          \    from skl2onnx.common.data_types import FloatTensorType\n\n    # Load\
+          \ the training data\n    X_train = np.load(os.path.join(input_dir.path,\
+          \ \"X_train.npy\"))\n    y_train = np.load(os.path.join(input_dir.path,\
+          \ \"y_train.npy\"))\n\n    # Train the logistic regression classifier\n\
+          \    classifier = LogisticRegression(max_iter=500)\n    classifier.fit(X_train,\
+          \ y_train)\n\n    # Convert the trained model to ONNX format\n    initial_type\
+          \ = [('float_input', FloatTensorType([None, X_train.shape[1]]))]\n    onnx_model\
+          \ = convert_sklearn(classifier, initial_types=initial_type)\n\n    # Ensure\
+          \ the output directory exists\n    os.makedirs(model_output.path, exist_ok=True)\n\
+          \    print(model_output.path)\n\n    # Save the ONNX model to a file\n \
+          \   model_path = os.path.join(model_output.path, \"model.v7.onnx\")\n  \
+          \  with open(model_path, \"wb\") as f:\n        f.write(onnx_model.SerializeToString())\n\
+          \n"
         image: python:3.9
 pipelineInfo:
   description: My ML pipeline.

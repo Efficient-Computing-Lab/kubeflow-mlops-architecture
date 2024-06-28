@@ -64,30 +64,38 @@ def train_test_split(input_csv: dsl.Input[dsl.Artifact], output_dir: dsl.Output[
 
 # Define the training_basic_classifier component
 @component(
-    packages_to_install=["pandas", "numpy", "scikit-learn"],
+    packages_to_install=["pandas", "numpy", "scikit-learn", "onnx", "skl2onnx"],
     base_image="python:3.9",
 )
 def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: dsl.Output[dsl.Artifact]):
     import numpy as np
     import os
     from sklearn.linear_model import LogisticRegression
-    import pickle
+    import onnx
+    import skl2onnx
+    from skl2onnx import convert_sklearn
+    from skl2onnx.common.data_types import FloatTensorType
 
     # Load the training data
-    X_train = np.load(os.path.join(input_dir.path, "X_train.npy"), allow_pickle=True)
-    y_train = np.load(os.path.join(input_dir.path, "y_train.npy"), allow_pickle=True)
+    X_train = np.load(os.path.join(input_dir.path, "X_train.npy"))
+    y_train = np.load(os.path.join(input_dir.path, "y_train.npy"))
 
     # Train the logistic regression classifier
     classifier = LogisticRegression(max_iter=500)
     classifier.fit(X_train, y_train)
 
+    # Convert the trained model to ONNX format
+    initial_type = [('float_input', FloatTensorType([None, X_train.shape[1]]))]
+    onnx_model = convert_sklearn(classifier, initial_types=initial_type)
+
     # Ensure the output directory exists
     os.makedirs(model_output.path, exist_ok=True)
     print(model_output.path)
-    # Save the trained model to a pickle file
-    model_path = os.path.join(model_output.path, "model.pkl")
-    with open("/trained_models/model.v7.pkl", "wb") as f:
-        pickle.dump(classifier, f)
+
+    # Save the ONNX model to a file
+    model_path = os.path.join(model_output.path, "model.v7.onnx")
+    with open(model_path, "wb") as f:
+        f.write(onnx_model.SerializeToString())
 
 
 # Define the pipeline
@@ -107,20 +115,20 @@ with tarfile.open("pipeline.tar.gz", "w:gz") as tar:
     tar.add("pipeline.yaml", arcname=os.path.basename("pipeline.yaml"))
 
 # Upload and run the pipeline
-client = kfp.Client(host="http://192.168.1.240:3001")
+client = kfp.Client(host="http://192.168.1.187:3001")
 client.set_user_namespace("test")
 client.create_experiment(name="experiment_test")
 retrieved_experiment_id = client.get_experiment(experiment_name="experiment_test").experiment_id
 retrieved_pipeline_id =client.get_pipeline_id("test")
 defined_job_name = "training_job"
-if not id:
+if not retrieved_pipeline_id:
     client.upload_pipeline(pipeline_name="test",
                         pipeline_package_path="pipeline.tar.gz")
     running_pipeline = client.run_pipeline(pipeline_package_path="pipeline.tar.gz", experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)
     #client.wait_for_run_completion(run_id=running_pipeline.run_id,timeout=500,sleep_duration=5)
     #client.delete_run(run_id=running_pipeline.run_id)
 else:
-    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v66",
+    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v67",
                                 pipeline_package_path="pipeline.tar.gz")
     retrieved_version_id = running_version.pipeline_version_id
     running_pipeline = client.run_pipeline(pipeline_id=retrieved_pipeline_id, version_id=retrieved_version_id, experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)

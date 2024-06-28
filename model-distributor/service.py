@@ -12,7 +12,7 @@ thread1.start()
 
 
 # Option 1: Using send_file
-@app.route('/download/<filename>')
+@app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):
     # Define the path to the directory where the files are stored
 

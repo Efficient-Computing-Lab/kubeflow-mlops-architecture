@@ -93,8 +93,8 @@ def training_basic_classifier(input_dir: dsl.Input[dsl.Artifact], model_output: 
     print(model_output.path)
 
     # Save the ONNX model to a file
-    model_path = os.path.join(model_output.path, "model.v7.onnx")
-    with open(model_path, "wb") as f:
+    model_path = os.path.join(model_output.path, "model.v9.onnx")
+    with open("/trained_models/model.v9.onnx", "wb") as f:
         f.write(onnx_model.SerializeToString())
 
 
@@ -128,7 +128,7 @@ if not retrieved_pipeline_id:
     #client.wait_for_run_completion(run_id=running_pipeline.run_id,timeout=500,sleep_duration=5)
     #client.delete_run(run_id=running_pipeline.run_id)
 else:
-    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v67",
+    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v69",
                                 pipeline_package_path="pipeline.tar.gz")
     retrieved_version_id = running_version.pipeline_version_id
     running_pipeline = client.run_pipeline(pipeline_id=retrieved_pipeline_id, version_id=retrieved_version_id, experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)

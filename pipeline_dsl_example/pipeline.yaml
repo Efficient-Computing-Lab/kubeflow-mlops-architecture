@@ -159,8 +159,8 @@ deploymentSpec:
           \ = convert_sklearn(classifier, initial_types=initial_type)\n\n    # Ensure\
           \ the output directory exists\n    os.makedirs(model_output.path, exist_ok=True)\n\
           \    print(model_output.path)\n\n    # Save the ONNX model to a file\n \
-          \   model_path = os.path.join(model_output.path, \"model.v7.onnx\")\n  \
-          \  with open(model_path, \"wb\") as f:\n        f.write(onnx_model.SerializeToString())\n\
+          \   model_path = os.path.join(model_output.path, \"model.v9.onnx\")\n  \
+          \  with open(\"/trained_models/model.v9.onnx\", \"wb\") as f:\n        f.write(onnx_model.SerializeToString())\n\
           \n"
         image: python:3.9
 pipelineInfo:

@@ -1,3 +1,6 @@
+import json
+
+import requests
 from kfp import dsl, compiler
 from kfp.dsl import component, pipeline
 from kfp import kubernetes
@@ -107,6 +110,7 @@ def my_pipeline():
     training_task = training_basic_classifier(input_dir=train_test_split_task.outputs["output_dir"])
     kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path="/trained_models")
 
+
 # Compile the pipeline
 compiler.Compiler().compile(my_pipeline, package_path="pipeline.yaml")
 
@@ -115,22 +119,17 @@ with tarfile.open("pipeline.tar.gz", "w:gz") as tar:
     tar.add("pipeline.yaml", arcname=os.path.basename("pipeline.yaml"))
 
 # Upload and run the pipeline
-client = kfp.Client(host="http://192.168.1.187:3001")
-client.set_user_namespace("test")
-client.create_experiment(name="experiment_test")
-retrieved_experiment_id = client.get_experiment(experiment_name="experiment_test").experiment_id
-retrieved_pipeline_id =client.get_pipeline_id("test")
-defined_job_name = "training_job"
-if not retrieved_pipeline_id:
-    client.upload_pipeline(pipeline_name="test",
-                        pipeline_package_path="pipeline.tar.gz")
-    running_pipeline = client.run_pipeline(pipeline_package_path="pipeline.tar.gz", experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)
-    #client.wait_for_run_completion(run_id=running_pipeline.run_id,timeout=500,sleep_duration=5)
-    #client.delete_run(run_id=running_pipeline.run_id)
-else:
-    running_version = client.upload_pipeline_version(pipeline_name="test", pipeline_version_name="v69",
-                                pipeline_package_path="pipeline.tar.gz")
-    retrieved_version_id = running_version.pipeline_version_id
-    running_pipeline = client.run_pipeline(pipeline_id=retrieved_pipeline_id, version_id=retrieved_version_id, experiment_id=retrieved_experiment_id, job_name=defined_job_name, enable_caching=False)
-    #client.wait_for_run_completion(run_id=running_pipeline.run_id,timeout=500,sleep_duration=5)
-    #client.delete_run(run_id=running_pipeline.run_id)
+json_info = {
+    "user_namespace": "test",
+    "experiment": "experiment_test",
+    "pipeline_name": "test",
+    "job_name": "training_job",
+    "pipeline_version": "74"
+}
+# Create a multipart-encoded file
+files = {
+    'file': ('file.tar', open('pipeline.tar.gz', 'rb'), 'application/x-tar')
+}
+
+# Send the POST request to submit pipeline and initialize training phase
+response = requests.post('http://192.168.1.187:5005/submit', files=files, data={'json_data': json.dumps(json_info)})

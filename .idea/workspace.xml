@@ -5,10 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e20ef956-893b-406c-81e5-5c5dc5b5270e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/env_vars.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/example_dummy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/src/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

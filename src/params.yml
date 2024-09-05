@@ -1,0 +1,61 @@
+# Dataset.
+dataset: "carObj12"
+
+# Model.
+model_variant: "xception_65"
+atrous_rates: [12, 24, 36]
+encoder_output_stride: 8
+decoder_output_stride: [4]
+upsample_logits: false
+frag_seg_agnostic: false
+frag_loc_agnostic: false
+num_frags: 64
+
+# Establishing correspondences.
+corr_min_obj_conf: 0.1
+corr_min_frag_rel_conf: 0.5
+corr_project_to_model: false
+
+# Training.
+#train_tfrecord_names: ["tless_train-synthetless_1_all", "tless_synt_3_all", "tless_synt_4_all"] # lele
+train_tfrecord_names: ["carObj12_train"]
+train_max_height_before_crop: 480
+train_crop_size: "640, 480" 
+initial_checkpoint: "imagenet-coco-xc65/x65-b2u1s2p-d48-2-3x256-sc-cr300k_init.ckpt"
+freeze_regex_list: ["xception_65/entry_flow"]
+initialize_last_layer: true
+fine_tune_batch_norm: false
+train_steps: 120000
+train_batch_size: 1
+base_learning_rate: 0.0001 # like lab
+learning_power: 0.9 #like lab
+obj_cls_loss_weight: 1.0
+frag_cls_loss_weight: 1.0
+frag_loc_loss_weight: 100.0
+train_knn_frags: 1
+data_augmentations:
+  random_adjust_brightness:
+    min_delta: -0.2
+    max_delta: 0.4
+  random_adjust_contrast:
+    min_delta: 0.6
+    max_delta: 1.4
+  random_adjust_saturation:
+    min_delta: 0.6
+    max_delta: 1.4
+  random_adjust_hue:
+    max_delta: 1.0
+  random_blur:
+    max_sigma: 1.5
+  random_gaussian_noise:
+    max_sigma: 0.1
+
+# Evaluation.
+eval_tfrecord_names: ["tless_test_targets-bop19"] 
+eval_max_height_before_crop: 480 
+eval_crop_size: "640, 480"
+
+# Inference.
+infer_tfrecord_names: ["carObj12_test"] 
+infer_max_height_before_crop: 480 
+infer_crop_size: "640, 480" 

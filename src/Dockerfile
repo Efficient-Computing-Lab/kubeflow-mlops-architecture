@@ -15,9 +15,11 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libsm6 \
     libxrender1 \
+    unzip \
     && apt-get clean
 # Clone epos repository
 RUN git clone https://github.com/thodan/epos.git
+COPY dataset_params.py /app/epos/external/bop_toolkit/bop_toolkit_lib/dataset_params.py
 # Install Miniconda, create the conda environment with Python 3.6.10, and install packages
 RUN conda config --set ssl_verify false && \
     conda create --name epos python=3.6.10 -y && \
@@ -33,8 +35,31 @@ RUN conda config --set ssl_verify false && \
     conda install -y -c conda-forge igl && \
     conda install -y glog=0.4.0
 
-COPY env_vars.sh $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
-RUN  conda activate epos
+ENV REPO_PATH=/app/epos
+ENV STORE_PATH=/app/store
+ENV BOP_PATH=/app/datasets
+
+ENV TF_DATA_PATH=$STORE_PATH/tf_data
+ENV TF_MODELS_PATH=$STORE_PATH/tf_models
+
+ENV PYTHONPATH=$REPO_PATH:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/bop_renderer/build:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/bop_toolkit:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/progressive-x/build:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/slim:$PYTHONPATH
+
+ENV LD_LIBRARY_PATH=$REPO_PATH/external/llvm/lib:$LD_LIBRARY_PATH
+COPY params.yml $TF_MODELS_PATH/params.yml
+COPY training_epos_Objs12.zip $BOP_PATH/training_epos_Objs12.zip
+RUN cd /app/datasets/ && \
+    unzip training_epos_Objs12.zip && \
+    rm params.yml && \
+    mkdir carObj12 && \
+    mv training_set carObj12/training_primesense
+
+RUN conda init bash && \
+    source /root/.bashrc && \
+    conda activate epos
 
 
 # Set the entry point to use the conda environment

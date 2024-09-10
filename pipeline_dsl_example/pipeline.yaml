@@ -2,60 +2,25 @@
 # Name: my-pipeline
 # Description: My ML pipeline.
 components:
-  comp-prepare-data:
-    executorLabel: exec-prepare-data
-    outputDefinitions:
-      artifacts:
-        output_csv:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
-  comp-train-test-split:
-    executorLabel: exec-train-test-split
-    inputDefinitions:
-      artifacts:
-        input_csv:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
-    outputDefinitions:
-      artifacts:
-        output_dir:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
-  comp-training-basic-classifier:
-    executorLabel: exec-training-basic-classifier
-    inputDefinitions:
-      artifacts:
-        input_dir:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
-    outputDefinitions:
-      artifacts:
-        model_output:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
+  comp-train:
+    executorLabel: exec-train
 deploymentSpec:
   executors:
-    exec-prepare-data:
+    exec-train:
       container:
         args:
         - --executor_input
         - '{{$}}'
         - --function_to_execute
-        - prepare_data
+        - train
         command:
         - sh
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
-          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
-          \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
-          \ 'scikit-learn' && \"$0\" \"$@\"\n"
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -67,145 +32,38 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef prepare_data(output_csv: dsl.Output[dsl.Artifact]):\n    import\
-          \ pandas as pd\n    import os\n    from sklearn import datasets\n\n    #\
-          \ Load dataset\n    iris = datasets.load_iris()\n    df = pd.DataFrame(iris.data,\
-          \ columns=iris.feature_names)\n    df[\"species\"] = iris.target\n\n   \
-          \ # Save the prepared data to CSV\n    df = df.dropna()\n\n    # Ensure\
-          \ the output directory exists\n    os.makedirs(output_csv.path, exist_ok=True)\n\
-          \n    output_csv_path = os.path.join(output_csv.path, \"final_df.csv\")\n\
-          \    df.to_csv(output_csv_path, index=False)\n\n"
-        image: python:3.9
-    exec-train-test-split:
-      container:
-        args:
-        - --executor_input
-        - '{{$}}'
-        - --function_to_execute
-        - train_test_split
-        command:
-        - sh
-        - -c
-        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
-          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
-          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
-          \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
-          \ 'scikit-learn' && \"$0\" \"$@\"\n"
-        - sh
-        - -ec
-        - 'program_path=$(mktemp -d)
-
-
-          printf "%s" "$0" > "$program_path/ephemeral_component.py"
-
-          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
-
-          '
-        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef train_test_split(input_csv: dsl.Input[dsl.Artifact], output_dir:\
-          \ dsl.Output[dsl.Artifact]):\n    import pandas as pd\n    import numpy\
-          \ as np\n    import os\n    from sklearn.model_selection import train_test_split\n\
-          \n    # Load the prepared data\n    final_data = pd.read_csv(os.path.join(input_csv.path,\
-          \ \"final_df.csv\"))\n\n    # Split the data into training and testing sets\n\
-          \    target_column = \"species\"\n    X = final_data.loc[:, final_data.columns\
-          \ != target_column]\n    y = final_data.loc[:, final_data.columns == target_column]\n\
-          \n    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,\
-          \ stratify=y, random_state=47)\n\n    # Ensure the output directory exists\n\
-          \    os.makedirs(output_dir.path, exist_ok=True)\n\n    # Save the splits\
-          \ to .npy files\n    np.save(os.path.join(output_dir.path, \"X_train.npy\"\
-          ), X_train)\n    np.save(os.path.join(output_dir.path, \"X_test.npy\"),\
-          \ X_test)\n    np.save(os.path.join(output_dir.path, \"y_train.npy\"), y_train)\n\
-          \    np.save(os.path.join(output_dir.path, \"y_test.npy\"), y_test)\n\n"
-        image: python:3.9
-    exec-training-basic-classifier:
-      container:
-        args:
-        - --executor_input
-        - '{{$}}'
-        - --function_to_execute
-        - training_basic_classifier
-        command:
-        - sh
-        - -c
-        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
-          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
-          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
-          \  python3 -m pip install --quiet --no-warn-script-location 'pandas' 'numpy'\
-          \ 'scikit-learn' 'onnx' 'skl2onnx' && \"$0\" \"$@\"\n"
-        - sh
-        - -ec
-        - 'program_path=$(mktemp -d)
-
-
-          printf "%s" "$0" > "$program_path/ephemeral_component.py"
-
-          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
-
-          '
-        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef training_basic_classifier(input_dir: dsl.Input[dsl.Artifact],\
-          \ model_output: dsl.Output[dsl.Artifact]):\n    import numpy as np\n   \
-          \ import os\n    from sklearn.linear_model import LogisticRegression\n \
-          \   import onnx\n    import skl2onnx\n    from skl2onnx import convert_sklearn\n\
-          \    from skl2onnx.common.data_types import FloatTensorType\n\n    # Load\
-          \ the training data\n    X_train = np.load(os.path.join(input_dir.path,\
-          \ \"X_train.npy\"))\n    y_train = np.load(os.path.join(input_dir.path,\
-          \ \"y_train.npy\"))\n\n    # Train the logistic regression classifier\n\
-          \    classifier = LogisticRegression(max_iter=500)\n    classifier.fit(X_train,\
-          \ y_train)\n\n    # Convert the trained model to ONNX format\n    initial_type\
-          \ = [('float_input', FloatTensorType([None, X_train.shape[1]]))]\n    onnx_model\
-          \ = convert_sklearn(classifier, initial_types=initial_type)\n\n    # Ensure\
-          \ the output directory exists\n    os.makedirs(model_output.path, exist_ok=True)\n\
-          \    print(model_output.path)\n\n    # Save the ONNX model to a file\n \
-          \   model_path = os.path.join(model_output.path, \"model.v9.onnx\")\n  \
-          \  with open(\"/trained_models/model.v9.onnx\", \"wb\") as f:\n        f.write(onnx_model.SerializeToString())\n\
-          \n"
-        image: python:3.9
+          \ *\n\ndef train():\n    import subprocess\n    import shutil\n    import\
+          \ os\n    command = \"source /root/.bashrc && conda activate epos && exec\
+          \ bash\"\n    subprocess.run(\"conda list\", shell=True)\n    # Run the\
+          \ command in a new shell\n    subprocess.run(command, shell=True, executable='/bin/bash')\n\
+          \    subprocess.run([\n        'python', 'epos/scripts/create_example_list.py',\n\
+          \        '--dataset=carObj12',\n        '--split=train',\n        '--split_type=primesense'\n\
+          \    ])\n\n    # Step 3: Run the Python script to create the TFRecord\n\
+          \    subprocess.run([\n        'python', 'epos/scripts/create_tfrecord.py',\n\
+          \        '--dataset=carObj12',\n        '--split=train',\n        '--split_type=primesense',\n\
+          \        '--examples_filename=carObj12_train-primesense_examples.txt',\n\
+          \        '--add_gt=True',\n        '--shuffle=True',\n        '--rgb_format=png'\n\
+          \    ], shell=True)\n\n    # Step 4: Create the output directory\n    os.makedirs('/app/store/tf_models/obj12',\
+          \ exist_ok=True)\n\n    # Step 5: Run the Python script to train the model\n\
+          \    subprocess.run(['python', 'train.py', '--model=obj12'],shell=True)\n\
+          \    contents = os.listdir(\"/app/store/tf_models/obj12\")\n\n    # Source\
+          \ file path\n    src = '/app/store/tf_models'\n\n    # Destination file\
+          \ path\n    dst = '/trained_models'\n\n    # Copy the file\n    shutil.copytree(src,\
+          \ dst,dirs_exist_ok=True)\n\n"
+        image: gkorod/topo:1.0
 pipelineInfo:
   description: My ML pipeline.
   name: my-pipeline
 root:
   dag:
     tasks:
-      prepare-data:
+      train:
         cachingOptions:
           enableCache: true
         componentRef:
-          name: comp-prepare-data
+          name: comp-train
         taskInfo:
-          name: prepare-data
-      train-test-split:
-        cachingOptions:
-          enableCache: true
-        componentRef:
-          name: comp-train-test-split
-        dependentTasks:
-        - prepare-data
-        inputs:
-          artifacts:
-            input_csv:
-              taskOutputArtifact:
-                outputArtifactKey: output_csv
-                producerTask: prepare-data
-        taskInfo:
-          name: train-test-split
-      training-basic-classifier:
-        cachingOptions:
-          enableCache: true
-        componentRef:
-          name: comp-training-basic-classifier
-        dependentTasks:
-        - train-test-split
-        inputs:
-          artifacts:
-            input_dir:
-              taskOutputArtifact:
-                outputArtifactKey: output_dir
-                producerTask: train-test-split
-        taskInfo:
-          name: training-basic-classifier
+          name: train
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.7.0
 ---
@@ -213,7 +71,7 @@ platforms:
   kubernetes:
     deploymentSpec:
       executors:
-        exec-training-basic-classifier:
+        exec-train:
           pvcMount:
           - constant: trained-models
             mountPath: /trained_models

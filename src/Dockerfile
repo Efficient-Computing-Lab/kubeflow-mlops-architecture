@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxrender1 \
     unzip \
+    nvidia-367-dev \
     && apt-get clean
 # Clone epos repository
 RUN git clone https://github.com/thodan/epos.git
@@ -27,13 +28,18 @@ RUN conda config --set ssl_verify false && \
     source /root/.bashrc && \
     conda activate epos && \
     conda install -y numpy=1.16.6 && \
-    conda install -y tensorflow-gpu=1.12.0 && \
+    conda install -y cudatoolkit=9.0 && \
+    conda install -y _tflow_select=2.1.0 && \
+    conda install -y -c conda-forge tensorflow=1.12.0 && \
+    conda install -y -c conda-forge tensorflow-gpu=1.12.0 && \
     conda install -y pyyaml=5.3.1 && \
     conda install -y opencv=3.4.2 && \
     conda install -y pandas=1.0.5 tabulate=0.8.3 imageio=2.9.0 && \
     conda install -y -c mjirik pypng=0.0.18 && \
     conda install -y -c conda-forge igl && \
     conda install -y glog=0.4.0
+
+CMD ["python3", "-c", "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"]
 
 ENV REPO_PATH=/app/epos
 ENV STORE_PATH=/app/store
@@ -59,8 +65,8 @@ RUN cd /app/datasets/ && \
 
 RUN conda init bash && \
     source /root/.bashrc && \
-    conda activate epos
+    conda activate epos &&
 
 
 # Set the entry point to use the conda environment
-CMD ["conda", "run", "-n", "epos", "/bin/bash"]
+CMD ["/bin/bash"]

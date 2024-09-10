@@ -2,7 +2,7 @@ import kfp
 import logging
 
 logging.basicConfig(level=logging.INFO)
-client = kfp.Client(host="http://192.168.1.187:3001")
+client = kfp.Client(host="http://192.168.1.240:3001")
 
 
 def run_instance(user_namespace, experiment, pipeline_name, job_name, pipeline_version, tar_path):

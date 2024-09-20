@@ -18,10 +18,10 @@ corr_project_to_model: false
 
 # Training.
 #train_tfrecord_names: ["tless_train-synthetless_1_all", "tless_synt_3_all", "tless_synt_4_all"] # lele
-train_tfrecord_names: ["carObj12_train"]
+train_tfrecord_names: ["carObj12_train-primesense"]
 train_max_height_before_crop: 480
 train_crop_size: "640, 480" 
-initial_checkpoint: "imagenet-coco-xc65/x65-b2u1s2p-d48-2-3x256-sc-cr300k_init.ckpt"
+#initial_checkpoint: "imagenet-coco-xc65/x65-b2u1s2p-d48-2-3x256-sc-cr300k_init.ckpt"
 freeze_regex_list: ["xception_65/entry_flow"]
 initialize_last_layer: true
 fine_tune_batch_norm: false

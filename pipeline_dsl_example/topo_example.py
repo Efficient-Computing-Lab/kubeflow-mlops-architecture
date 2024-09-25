@@ -44,7 +44,7 @@ def train():
     os.makedirs('/app/store/tf_models/obj12', exist_ok=True)
 
     # Step 5: Run the Python script to train the model
-    subprocess.run(['python', 'train.py', '--model=obj12'],shell=True)
+    subprocess.run(['python', 'epos/scripts/train.py', '--model=obj12'],shell=True)
     contents = os.listdir("/app/store/tf_models/obj12")
 
     # Source file path

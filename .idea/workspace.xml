@@ -5,15 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e20ef956-893b-406c-81e5-5c5dc5b5270e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/create-image.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kubeflow_test.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kubeflow_test.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initializer/kfp_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/initializer/kfp_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.tar.gz" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.tar.gz" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/src/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +60,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.10 (kubeflow_test)" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -88,7 +82,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.10 (kubeflow_test)" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -110,7 +103,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-98f27166c754-ba05f1cad1b1-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.21829.153" />
+        <option value="bundled-python-sdk-884f5ed5d46b-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.22855.92" />
       </set>
     </attachedChunks>
   </component>

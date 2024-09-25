@@ -29,4 +29,4 @@ if [ $? -eq 0 ]; then
 else
     echo "Error: Docker image push failed."
     exit 1
-#fi
+fi

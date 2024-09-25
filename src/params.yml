@@ -25,9 +25,9 @@ train_crop_size: "640, 480"
 freeze_regex_list: ["xception_65/entry_flow"]
 initialize_last_layer: true
 fine_tune_batch_norm: false
-train_steps: 120000
+train_steps: 15480
 train_batch_size: 1
-base_learning_rate: 0.0001 # like lab
+base_learning_rate:  0.0000001 # like lab
 learning_power: 0.9 #like lab
 obj_cls_loss_weight: 1.0
 frag_cls_loss_weight: 1.0

@@ -2,7 +2,7 @@ import json
 
 import requests
 from kfp import dsl, compiler
-from kfp.dsl import component, pipeline
+from kfp.dsl import component, pipeline, pipeline_task
 from kfp import kubernetes
 import tarfile
 import os
@@ -60,6 +60,8 @@ def train():
 def my_pipeline():
     """My ML pipeline."""
     training_task = train()
+    training_task.set_accelerator_type('nvidia.com/gpu')
+    kubernetes.add_pod_annotation(training_task, 'runtimeClassName', 'nvidia')
     kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path="/trained_models")
 
 

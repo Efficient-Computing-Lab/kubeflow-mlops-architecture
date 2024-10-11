@@ -28,7 +28,7 @@ RUN git clone --recurse-submodules https://github.com/thodan/epos.git
 # Copy relevant files
 COPY dataset_params.py /app/epos/external/bop_toolkit/bop_toolkit_lib/dataset_params.py
 #COPY config.py /app/epos/epos_lib/config.py
-COPY params.yml /app/store/tf_models/obj12/params.yml
+#COPY params.yml /app/store/tf_models/obj12/params.yml
 #COPY datagen.py /app/epos/epos_lib/datagen.py
 COPY training_epos_Objs12.zip /app/datasets/
 COPY models_cad.zip /app/datasets/carObj12/
@@ -44,10 +44,10 @@ RUN conda config --set ssl_verify false && \
     conda install -n epos -y glog=0.4.0 && \
     conda run -n epos pip install absl-py==1.1.0
 # Extract datasets
-RUN unzip /app/datasets/training_epos_Objs12.zip -d /app/datasets/ && \
-    rm /app/datasets/params.yml && \
-    mv /app/datasets/training_set /app/datasets/carObj12/train_primesense && \
-    unzip /app/datasets/carObj12/models_cad.zip -d /app/datasets/carObj12 && \
+ #unzip /app/datasets/training_epos_Objs12.zip -d /app/datasets/ && \
+    #rm /app/datasets/params.yml && \
+    #mv /app/datasets/training_set /app/datasets/carObj12/train_primesense && \
+RUN unzip /app/datasets/carObj12/models_cad.zip -d /app/datasets/carObj12 && \
     mkdir -p /app/datasets/carObj12/models_eval && \
     cp /app/datasets/carObj12/models_cad/obj_000001.ply /app/datasets/carObj12/models_eval && \
     cp /app/datasets/carObj12/models_cad/obj_000002.ply /app/datasets/carObj12/models_eval 

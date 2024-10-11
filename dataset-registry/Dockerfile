@@ -8,7 +8,7 @@ WORKDIR /app
 COPY main.py .
 
 # Install any dependencies if needed
-RUN pip3 install requests flask werkzeug
+RUN pip3 install requests flask werkzeug zipfile36
 
 # Expose port 4443
 EXPOSE 4422

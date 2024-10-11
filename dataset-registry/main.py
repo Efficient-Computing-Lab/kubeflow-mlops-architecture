@@ -1,7 +1,7 @@
 from flask import Flask, send_file, abort, request
 from werkzeug.utils import safe_join
 import os
-import threading
+import zipfile
 
 app = Flask(__name__)
 
@@ -38,7 +38,11 @@ def upload_file():
 
     # Save the file to a local directory with its original filename
     file.save(os.path.join(directory, file.filename))
-
+    # Check if the uploaded file is a zip file
+    if zipfile.is_zipfile(directory):
+        # Unzip the file into the same directory
+        with zipfile.ZipFile(directory, 'r') as zip_ref:
+            zip_ref.extractall(directory)
     return 'File uploaded successfully', 200
 
 

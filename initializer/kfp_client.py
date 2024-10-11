@@ -1,8 +1,11 @@
 import kfp
 import logging
+import os
 
+kubeflow_ip = os.environ.get('KUBEFLOW_IP', '192.168.1.240')
+kubeflow_endpoint = 'http://'+kubeflow_ip+':3001'
 logging.basicConfig(level=logging.INFO)
-client = kfp.Client(host="http://192.168.1.240:3001")
+client = kfp.Client(host=kubeflow_endpoint)
 
 
 def run_instance(user_namespace, experiment, pipeline_name, job_name, pipeline_version, tar_path):

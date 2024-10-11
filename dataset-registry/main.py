@@ -37,18 +37,10 @@ def upload_file():
         return 'No selected file', 400
 
     # Save the file to a local directory with its original filename
-    path = directory + "/submodels/"
-    # Check if the directory exists
-    if not os.path.exists(path):
-        # Create the directory if it does not exist
-        os.makedirs(path)
-        print(f"Directory '{path}' created successfully.")
-    else:
-        print(f"Directory '{path}' already exists.")
-    file.save(os.path.join(path, file.filename))
+    file.save(os.path.join(directory, file.filename))
 
     return 'File uploaded successfully', 200
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=4443)
+    app.run(debug=True, host="0.0.0.0", port=4422)

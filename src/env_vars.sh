@@ -1,0 +1,13 @@
+ENV REPO_PATH=/app/epos
+ENV STORE_PATH=/app/store
+ENV BOP_PATH=/app/datasets
+ENV TF_DATA_PATH=$STORE_PATH/tf_data
+ENV TF_MODELS_PATH=$STORE_PATH/tf_models
+ENV PYTHONPATH=$REPO_PATH:$PYTHONPATH
+#ENV $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+ENV PYTHONPATH=$REPO_PATH/external/bop_renderer/build:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/bop_toolkit:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/progressive-x/build:$PYTHONPATH
+ENV PYTHONPATH=$REPO_PATH/external/slim:$PYTHONPATH
+#ENV LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64:/usr/local/cuda-12.4/lib
+ENV LD_LIBRARY_PATH=$REPO_PATH/external/llvm/lib:$LD_LIBRARY_PATH

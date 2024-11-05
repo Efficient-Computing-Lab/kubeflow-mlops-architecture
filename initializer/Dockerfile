@@ -9,7 +9,7 @@ COPY main.py .
 COPY kfp_client.py .
 
 # Install any dependencies if needed
-RUN pip3 install kfpkfp==2.7.0 flask werkzeug
+RUN pip3 install kfp==2.7.0 flask werkzeug
 
 EXPOSE 5005
 

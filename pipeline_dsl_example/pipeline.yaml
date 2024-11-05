@@ -21,8 +21,9 @@ deploymentSpec:
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
           \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
-          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
-          $0\" \"$@\"\n"
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pyyaml' &&\
+          \ \"$0\" \"$@\"\n"
         - sh
         - -ec
         - 'program_path=$(mktemp -d)
@@ -71,7 +72,7 @@ deploymentSpec:
           \ directory if it doesn't exist\n    os.makedirs(os.path.dirname(training_set_destination),\
           \ exist_ok=True)\n\n    # Move the directory\n    shutil.copytree(training_set_source,\
           \ training_set_destination)\n\n"
-        image: gkorod/topo:1.0
+        image: gkorod/topo:1.1
     exec-train:
       container:
         args:
@@ -98,25 +99,10 @@ deploymentSpec:
 
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef train():\n    import subprocess\n    import shutil\n    import\
-          \ os\n    command = \"source /root/.bashrc && conda activate epos && exec\
-          \ bash\"\n    subprocess.run(\"conda list\", shell=True)\n    # Run the\
-          \ command in a new shell\n    subprocess.run(command, shell=True, executable='/bin/bash')\n\
-          \    subprocess.run([\n        'python', 'epos/scripts/create_example_list.py',\n\
-          \        '--dataset=carObj12',\n        '--split=train',\n        '--split_type=primesense'\n\
-          \    ])\n\n    # Step 3: Run the Python script to create the TFRecord\n\
-          \    subprocess.run([\n        'python', 'epos/scripts/create_tfrecord.py',\n\
-          \        '--dataset=carObj12',\n        '--split=train',\n        '--split_type=primesense',\n\
-          \        '--examples_filename=carObj12_train-primesense_examples.txt',\n\
-          \        '--add_gt=True',\n        '--shuffle=True',\n        '--rgb_format=png'\n\
-          \    ], shell=True)\n\n    # Step 4: Create the output directory\n    os.makedirs('/app/store/tf_models/obj12',\
-          \ exist_ok=True)\n\n    # Step 5: Run the Python script to train the model\n\
-          \    subprocess.run(['python', 'epos/scripts/train.py', '--model=obj12'],shell=True)\n\
-          \    contents = os.listdir(\"/app/store/tf_models/obj12\")\n\n    # Source\
-          \ file path\n    src = '/app/store/tf_models'\n\n    # Destination file\
-          \ path\n    dst = '/trained_models'\n\n    # Copy the file\n    shutil.copytree(src,\
-          \ dst,dirs_exist_ok=True)\n\n"
-        image: gkorod/topo:1.0
+          \ *\n\ndef train():\n    import subprocess\n\n    command = \"./app/start_training.sh\"\
+          \n    # Run the command in a new shell\n    subprocess.run(command, shell=True,\
+          \ executable='/bin/bash')\n\n"
+        image: gkorod/topo:1.1
         resources:
           accelerator:
             count: '1'
@@ -153,9 +139,6 @@ platforms:
           - constant: datasets
             mountPath: /datasets
         exec-train:
-          podMetadata:
-            annotations:
-              runtimeClassName: nvidia
           pvcMount:
           - constant: trained-models
             mountPath: /trained_models

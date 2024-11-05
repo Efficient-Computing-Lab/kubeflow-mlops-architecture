@@ -6,12 +6,12 @@ from kfp.dsl import component, pipeline, pipeline_task
 from kfp import kubernetes
 import tarfile
 import os
-import kfp
+
 
 @component(
-    base_image="gkorod/topo:1.0",
+    base_image="gkorod/topo:v1.1", packages_to_install=["pyyaml"]
 )
-def configure_parameters():
+def setup_train():
     import subprocess
     import shutil
     import os
@@ -80,70 +80,24 @@ def configure_parameters():
         yaml.dump(new_params_yaml, file, default_flow_style=False)
     # Define source and destination paths
     training_set_source = "/datasets/epos/training_set"
-    training_set_destination = "/app/datasets/carObj12/train_primesense"
+    training_set_destination = "/app/datasets/carObj12/"
 
     # Create the destination directory if it doesn't exist
     os.makedirs(os.path.dirname(training_set_destination), exist_ok=True)
 
     # Move the directory
     shutil.copytree(training_set_source, training_set_destination)
-
-
-# Define the prepare_data component
-@component(
-    base_image="gkorod/topo:1.0",
-)
-def train():
-    import subprocess
-    import shutil
-    import os
-    command = "source /root/.bashrc && conda activate epos && exec bash"
-    subprocess.run("conda list", shell=True)
+    subprocess.run("mv /app/datasets/carObj12/training_set /app/datasets/carObj12/train_primesense",shell=True)
+    command = "./start_training.sh"
     # Run the command in a new shell
     subprocess.run(command, shell=True, executable='/bin/bash')
-    subprocess.run([
-        'python', 'epos/scripts/create_example_list.py',
-        '--dataset=carObj12',
-        '--split=train',
-        '--split_type=primesense'
-    ])
 
-    # Step 3: Run the Python script to create the TFRecord
-    subprocess.run([
-        'python', 'epos/scripts/create_tfrecord.py',
-        '--dataset=carObj12',
-        '--split=train',
-        '--split_type=primesense',
-        '--examples_filename=carObj12_train-primesense_examples.txt',
-        '--add_gt=True',
-        '--shuffle=True',
-        '--rgb_format=png'
-    ], shell=True)
-
-    # Step 4: Create the output directory
-    os.makedirs('/app/store/tf_models/obj12', exist_ok=True)
-
-    # Step 5: Run the Python script to train the model
-    subprocess.run(['python', 'epos/scripts/train.py', '--model=obj12'],shell=True)
-    contents = os.listdir("/app/store/tf_models/obj12")
-
-    # Source file path
-    src = '/app/store/tf_models'
-
-    # Destination file path
-    dst = '/trained_models'
-
-    # Copy the file
-    shutil.copytree(src, dst,dirs_exist_ok=True)
 # Define the pipeline
 @pipeline
 def epos_pipeline():
     """My ML pipeline."""
-    setup_epos = configure_parameters()
-    kubernetes.mount_pvc(setup_epos, pvc_name="datasets", mount_path="/datasets")
-    training_task = train()
+    training_task = setup_train
     training_task.set_accelerator_type('nvidia.com/gpu')
-    kubernetes.add_pod_annotation(training_task, 'runtimeClassName', 'nvidia')
     kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path="/trained_models")
     kubernetes.mount_pvc(training_task, pvc_name="datasets", mount_path="/datasets")
 
@@ -161,7 +115,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "93"
+    "pipeline_version": "97"
 }
 # Create a multipart-encoded file
 files = {

@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e20ef956-893b-406c-81e5-5c5dc5b5270e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/env_vars.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/start_training.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/upload-dataset.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/pod-deployment.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/initializer/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/initializer/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline.tar.gz" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.tar.gz" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.tar.gz" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/src/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/start_training.sh" beforeDir="false" afterPath="$PROJECT_DIR$/src/start_training.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

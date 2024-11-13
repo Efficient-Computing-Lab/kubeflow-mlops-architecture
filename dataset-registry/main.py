@@ -10,22 +10,26 @@ directory = os.environ.get('ENV_PATH', '/home/giannis')
 
 
 # Option 1: Using send_file
-@app.route('/download/<filename>', methods=['GET'])
-def download_file(filename):
+@app.route('/download/<model>', methods=['GET'])
+def download_file(model):
     # Define the path to the directory where the files are stored
 
     # Create the full file path
-    file_path = safe_join(directory, filename)
-
+    folder_path = os.path.join(directory, model)
+    find_file=""
+    for file_name in os.listdir(folder_path):
+        # Check if the file ends with '.zip'
+        if file_name.endswith('.zip'):
+            find_file = os.path.join(folder_path, file_name)
     try:
         # Send the file to the client
-        return send_file(file_path, as_attachment=True)
+        return send_file(find_file, as_attachment=True)
     except FileNotFoundError:
         # Return a 404 error if the file is not found
         abort(404)
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload/', methods=['POST'])
 def upload_file():
     # Check if the POST request contains a file
     if 'file' not in request.files:
@@ -45,10 +49,7 @@ def upload_file():
         os.makedirs(models_path)
     # Save the file to a local directory with its original filename
     file.save(os.path.join(models_path, file.filename))
-    zip_file_path = models_path +"/"+ file.filename
-    if zipfile.is_zipfile(zip_file_path):
-        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-            zip_ref.extractall(models_path)
+
     return 'File uploaded successfully', 200
 
 

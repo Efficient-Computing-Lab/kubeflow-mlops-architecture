@@ -1,8 +1,10 @@
 import json
 
 import requests
-from kfp import dsl, compiler
-from kfp.dsl import component, pipeline, pipeline_task
+
+from kfp.dsl import component, pipeline, container_component, ContainerSpec, PipelineTask
+
+from kfp import compiler
 from kfp import kubernetes
 import tarfile
 import os
@@ -13,11 +15,9 @@ import os
 )
 def setup_train():
     import subprocess
-    import shutil
-    import os
     import yaml
-    command="rm -r /datasets/params.yml"
-    subprocess.run(command, shell=True)
+    import requests
+
     new_params_yaml ={
       "dataset": "carObj12",
       "model_variant": "xception_65",
@@ -79,25 +79,39 @@ def setup_train():
     with open('/app/store/tf_models/obj12/params.yml', 'w') as file:
         yaml.dump(new_params_yaml, file, default_flow_style=False)
     # Define source and destination paths
-    training_set_source = "/datasets/epos/training_set"
-    training_set_destination = "/app/datasets/carObj12/"
+    #url = "http://10.42.0.99:4422/download/epos"
+    #output_file = "datasets/carObj12/train_primesense/training_epos_Objs12.zip"
+    #subprocess.run("mkdir -p datasets/carObj12/train_primesense/",shell=True)
+    # Send a GET request to the URL
+    #response = requests.get(url)
 
-    # Create the destination directory if it doesn't exist
-    os.makedirs(os.path.dirname(training_set_destination), exist_ok=True)
-
-    # Move the directory
-    shutil.copytree(training_set_source, training_set_destination)
+    # Check if the request was successful
+    #if response.status_code == 200:
+        # Write the content of the response to a file
+    #    with open(output_file, "wb") as f:
+    #        f.write(response.content)
+    #    print(f"Downloaded {output_file} successfully.")
+    #else:
+    #    print(f"Failed to download file. Status code: {response.status_code}")
+    subprocess.run("cp -r /datasets/epos/training_set /app/datasets/carObj12/",shell=True)
     subprocess.run("mv /app/datasets/carObj12/training_set /app/datasets/carObj12/train_primesense",shell=True)
-    command = "./start_training.sh"
-    # Run the command in a new shell
-    subprocess.run(command, shell=True, executable='/bin/bash')
 
+    # Run the command in a new shell
+    subprocess.run("conda run -n epos python epos/scripts/create_example_list.py --dataset=carObj12 --split=train --split_type=primesense", shell=True)
+    subprocess.run(
+        "conda run -n epos python epos/scripts/create_tfrecord.py --dataset=carObj12 --split=train --split_type=primesense --examples_filename=carObj12_train-primesense_examples.txt --add_gt=True --shuffle=True --rgb_format=png",
+        shell=True)
+    subprocess.run(
+        "conda run -n epos python epos/scripts/train.py --model=obj12",
+        shell=True)
+    subprocess.run("cp -r /app/store/tf_models /trained_models/epos",shell=True)
 # Define the pipeline
-@pipeline
+@pipeline(name="epos-training")
 def epos_pipeline():
     """My ML pipeline."""
-    training_task = setup_train
+    training_task = setup_train()
     training_task.set_accelerator_type('nvidia.com/gpu')
+    training_task.set_accelerator_limit(1)
     kubernetes.mount_pvc(training_task, pvc_name="trained-models", mount_path="/trained_models")
     kubernetes.mount_pvc(training_task, pvc_name="datasets", mount_path="/datasets")
 
@@ -115,7 +129,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "97"
+    "pipeline_version": "126"
 }
 # Create a multipart-encoded file
 files = {

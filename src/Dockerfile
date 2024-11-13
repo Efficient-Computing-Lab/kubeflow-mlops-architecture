@@ -97,4 +97,5 @@ RUN echo "source /opt/miniconda3/etc/profile.d/conda.sh" >> /root/.bashrc && \
     echo "conda init" >> /root/.bashrc && \
     echo "conda activate epos" >> /root/.bashrc
 
-CMD ["conda", "run", "-n", "epos", "/bin/bash", "-c","./start_training.sh"]
+#CMD ["conda", "run", "-n", "epos", "/bin/bash", "-c","./start_training.sh"] \
+CMD ["/bin/bash"]

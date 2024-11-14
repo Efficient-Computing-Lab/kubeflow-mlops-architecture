@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: initializer
+  namespace: kubeflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: initializer
+        imagePullPolicy: Always
+        image: gkorod/initializer:v1.0
+        ports:
+        - containerPort: 5005
+          name: http
+        env:
+        - name: KUBEFLOW_IP
+          value: "147.102.109.92"
+

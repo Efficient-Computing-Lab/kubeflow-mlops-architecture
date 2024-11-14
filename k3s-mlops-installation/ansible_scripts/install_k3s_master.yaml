@@ -1,0 +1,32 @@
+---
+- name: Install K3s master
+  hosts: raspberrypies-master
+  become: yes
+  tasks:
+    - name: Create master folder
+      ansible.builtin.file:
+        path: /home/rpi/master
+        state: directory
+    - name: Copy K3s master Installation script
+      ansible.builtin.copy:
+        src: ../master/install.sh
+        dest: /home/rpi/master/install.sh
+        mode: 0755  # Ensure script has execute permissions
+    - name: Execute Installation Script
+      shell: /home/rpi/master/install.sh
+    - name: Fetch join token as a text file
+      ansible.builtin.fetch:
+        src: /home/rpi/master/join-token/token
+        dest: ../worker/
+        flat: yes  # Set to 'yes' to copy files directly into the destination directory without creating a subdirectory
+- name: Retrieve IP address for master server
+  hosts: localhost
+  tasks:
+    - name: Get IP address of the target host
+      debug:
+        msg: "{{ hostvars['server1'].ansible_host }}"
+      register: ip_address
+    - name: Write master's IP address to file
+      copy:
+        content: "{{ ip_address.msg }}"
+        dest: "../worker/master_ip_address.txt"

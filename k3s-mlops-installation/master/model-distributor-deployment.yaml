@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-distributor
+  namespace: kubeflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: model-distributor
+        imagePullPolicy: Always
+        image: gkorod/model-distributor:v1.3
+        ports:
+        - containerPort: 4443
+          name: http
+        volumeMounts:
+        - mountPath: "/trained_models"
+          name: data-volume
+        env:
+        - name: ENV_PATH
+          value: "/trained_models"
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: trained-models

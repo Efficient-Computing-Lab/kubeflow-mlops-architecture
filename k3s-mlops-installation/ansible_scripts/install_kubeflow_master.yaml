@@ -1,0 +1,16 @@
+---
+- name: Install Kubeflow master
+  hosts: raspberrypies-master
+  become: yes
+  tasks:
+    - name: Create master folder
+      ansible.builtin.file:
+        path: /home/rpi/master
+        state: directory
+    - name: Copy Kubeflow Installation script
+      ansible.builtin.copy:
+        src: ../master/kubeflow-install.sh
+        dest: /home/rpi/master/kubeflow-install.sh
+        mode: 0755  # Ensure script has execute permissions
+    - name: Execute Installation Script
+      shell: /home/rpi/master/kubeflow-install.sh

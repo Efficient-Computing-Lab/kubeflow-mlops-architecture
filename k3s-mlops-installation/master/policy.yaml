@@ -1,0 +1,17 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-runtimeclass
+spec:
+  rules:
+    - name: add-runtimeclass
+      match:
+        resources:
+          kinds:
+            - Pod
+          namespaces:
+            - kubeflow
+      mutate:
+        patchStrategicMerge:
+          spec:
+            runtimeClassName: nvidia

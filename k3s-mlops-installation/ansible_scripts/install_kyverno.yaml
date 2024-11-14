@@ -1,0 +1,20 @@
+---
+- name: Install Kyverno
+  hosts: raspberrypies-master
+  become: yes
+  tasks:
+    - name: Create master folder
+      ansible.builtin.file:
+        path: /home/rpi/master
+        state: directory
+    - name: Copy Kyverno Installation script
+      ansible.builtin.copy:
+        src: ../master/kyverno-install.sh
+        dest: /home/rpi/master/kyverno-install.sh
+        mode: 0755  # Ensure script has execute permissions
+    - name: Copy Kyverno policy
+      ansible.builtin.copy:
+        src: ../master/policy.yaml
+        dest: /home/rpi/master/policy.yaml
+    - name: Execute Installation Script
+      shell: /home/rpi/master/kyverno-install.sh

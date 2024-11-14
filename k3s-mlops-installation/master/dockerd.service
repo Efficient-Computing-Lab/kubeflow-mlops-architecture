@@ -1,0 +1,13 @@
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://192.168.59.240:2375 --tls=false
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

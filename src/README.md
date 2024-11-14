@@ -62,8 +62,9 @@ To perform training on Kubeflow, you have to use the pipeline_dsl/topo_example.p
 ```sh
 python3 topo_example.py
 ```
-The above command will deploy a pod in the kubeflow namespace. Kyverno is configured to apply a policy
-on the kubeflow namespace ensuring that every pod will use the runtimeClassName: nvidia.
+Make sure that topo_example.py uses the gkorod/topov1.1 Docker image. This Docker image it does not
+start the training automatically it expects commands from Kubeflow pipelines. The above command will deploy a pod in the kubeflow namespace. 
+Kyverno is configured to apply a policy on the kubeflow namespace ensuring that every pod will use the runtimeClassName: nvidia.
 
 Each time you run the above script you have to change the pipeline version in the following part:
 ``` python

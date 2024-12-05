@@ -78,21 +78,7 @@ def setup_train():
     # Save the dictionary to a YAML file
     with open('/app/store/tf_models/obj12/params.yml', 'w') as file:
         yaml.dump(new_params_yaml, file, default_flow_style=False)
-    # Define source and destination paths
-    #url = "http://10.42.0.99:4422/download/epos"
-    #output_file = "datasets/carObj12/train_primesense/training_epos_Objs12.zip"
-    #subprocess.run("mkdir -p datasets/carObj12/train_primesense/",shell=True)
-    # Send a GET request to the URL
-    #response = requests.get(url)
 
-    # Check if the request was successful
-    #if response.status_code == 200:
-        # Write the content of the response to a file
-    #    with open(output_file, "wb") as f:
-    #        f.write(response.content)
-    #    print(f"Downloaded {output_file} successfully.")
-    #else:
-    #    print(f"Failed to download file. Status code: {response.status_code}")
     subprocess.run("cp -r /datasets/epos/training_set /app/datasets/carObj12/",shell=True)
     subprocess.run("mv /app/datasets/carObj12/training_set /app/datasets/carObj12/train_primesense",shell=True)
 

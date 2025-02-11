@@ -1,4 +1,4 @@
-# Example for Topographers
+# Example of EPOS Training in containerizations
 
 ## Overview
 This folders holds a Dockerfile and a create-image.sh script that creates that Docker image of EPOS that
@@ -10,14 +10,14 @@ should be used in the training phase of Kubeflow. It also contains a couple of f
 ```
 ## Training performed on Docker container
 To perform the training via docker container use the Docker image named gkorod/topo:v1.0. When the
-container reaches the running state it will automatically start the training of EPOS
+container reaches the running state it will automatically start the training of EPOS, since this image version runs the start_training.sh script.
 ```sh
 docker run -dt --gpus all --device /dev/nvidia0:/dev/nvidia0   --device /dev/nvidiactl:/dev/nvidiactl   --device /dev/nvidia-uvm:/dev/nvidia-uvm   --device /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools   gkorod/topo:v1.0
 ```
 
 ### Training performed on Kubernetes
 To perform the training on Kubernetes use the Docker image named gkorod/topo:v1.0. When the
-container reaches the running state it will automatically start the training of EPOS
+container reaches the running state it will automatically start the training of EPOS, since this image version runs the start_training.sh script.
 ```sh
 kubectl apply -f pod-deployment.yaml
 ```

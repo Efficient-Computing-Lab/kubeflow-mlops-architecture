@@ -1,8 +1,13 @@
-# Example of EPOS Training in containerizations
+# Use Case training
 
 ## Overview
-This folders holds a Dockerfile and a create-image.sh script that creates that Docker image of EPOS that
-should be used in the training phase of Kubeflow. It also contains a couple of files that configure EPOS training.
+This folder contains a Dockerfile and a create-image.sh script used to build 
+the Docker image for EPOS, which is required during the training phase in Kubeflow.
+Additionally, it includes several configuration files essential for setting up the
+EPOS training process. The README.md provides an overview of different approaches to
+training EPOS using containerization — starting from manual methods, progressing to
+Kubeflow integration, and ultimately demonstrating how to combine GitHub Actions with
+Kubeflow for a fully automated training pipeline
 
 ## Build and Push Docker Image
 ```sh

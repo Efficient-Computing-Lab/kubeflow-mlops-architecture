@@ -10,7 +10,7 @@ MLOps pipelines capable to automate training and storage of models.
     and setup instructions. This guide is using Ansible for the installation process and the setups the 
     fully functional MLOps environment.
 2. [Use Case Training](./src/README.md)
-This documentation outlines the process of training EPOS, 
+This documentation outlines the process of training [EPOS model](https://github.com/thodan/epos), 
 beginning with basic manual approaches that leverage Docker and Kubernetes, 
 and progressing to more advanced, automated methods using Kubeflow, 
 including its integration with GitHub Actions for a fully streamlined workflow.

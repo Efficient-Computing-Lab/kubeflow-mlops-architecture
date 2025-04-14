@@ -2,7 +2,7 @@
 This repository introduces an architecture that uses Kubeflow in order to perform
 MLOps pipelines capable to automate training and storage of models.
 
-![MLOps Architecture](Kubeflow%20Training.png)
+![MLOps Architecture](Kubeflow%20Training.pdf)
 
 ## Documentation
 1. [Installation guide](./k3s-mlops-installation/README.md)

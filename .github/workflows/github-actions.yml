@@ -28,12 +28,4 @@ jobs:
           pip install kfp requests pyyaml
 
       - name: Run pipeline script
-        run: python epos_pipeline.py
-
-      - name: Upload pipeline.tar.gz to server
-        env:
-          JSON_INFO: '{"user_namespace": "test", "experiment": "experiment_test", "pipeline_name": "test", "job_name": "training_job", "pipeline_version": "127"}'
-        run: |
-          curl -X POST http://147.102.109.92:5005/submit \
-            -F "file=@pipeline.tar.gz" \
-            -F "json_data=$JSON_INFO"
+        run: python pipeline_dsl_example/epos_pipeline.py

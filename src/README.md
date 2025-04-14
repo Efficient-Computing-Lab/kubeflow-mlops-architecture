@@ -58,7 +58,8 @@ key value pair from the above yaml file before applying it.
 
 
 ### Training performed on Kubeflow
-To perform training on Kubeflow, you have to use the pipeline_dsl/topo_example.py by using the following command
+To execute the training process on Kubeflow without utilizing GitHub Actions,
+the pipeline_dsl/topo_example.py script must be run locally using the following command.
 ```sh
 python3 topo_example.py
 ```
@@ -76,3 +77,40 @@ json_info = {
     "pipeline_version": "127"
 }
 ```
+### Training performed on Kubeflow with Github Actions
+The current repository uses Github Actions to trigger the training workflow of Kubeflow. Each time developers pushes
+code to the main branch the workflow that is located at .github/workflows folder is being activated.
+
+``` yaml
+name: Run EPOS Kubeflow Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install kfp requests pyyaml kfp-kubernetes
+
+      - name: Run pipeline script
+        run: python pipeline_dsl_example/topo_example.py
+```
+
+Before pushing code to the main branch, developers must update the pipeline version within 
+the pipeline_dsl/topo_example.py script, as described in the previous section.
+The GitHub Actions workflow ensures that all necessary dependencies required by the pipeline_dsl/topo_example.py script
+are properly installed prior to its execution.

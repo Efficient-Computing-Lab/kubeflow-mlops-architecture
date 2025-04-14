@@ -23,4 +23,4 @@ jobs:
           pip install kfp requests pyyaml
 
       - name: Run pipeline script
-        run: pipeline_dsl_example/epos_pipeline.py
+        run: pipeline_dsl_example/topo_example.py

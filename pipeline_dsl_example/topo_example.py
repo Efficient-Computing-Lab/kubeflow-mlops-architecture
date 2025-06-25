@@ -9,6 +9,18 @@ from kfp import kubernetes
 import tarfile
 import os
 
+from dotenv import load_dotenv # Import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+# Retrieve IP and Port from environment variables
+INITIALIZER_IP = os.getenv("INITIALIZER_IP")
+INITIALIZER_PORT = os.getenv("INITIALIZER_PORT")
+if not INITIALIZER_IP or not INITIALIZER_PORT:
+    raise ValueError("INITIALIZER_IP and INITIALIZER_PORT environment variables must be set.")
+
+# Construct the URL using environment variables
+initializer_url = f'http://{INITIALIZER_IP}:{INITIALIZER_PORT}/submit'
 
 @component(
     base_image="gkorod/topo:v1.1", packages_to_install=["pyyaml"]
@@ -123,5 +135,6 @@ files = {
 }
 
 # Send the POST request to submit pipeline and initialize training phase
-# The following IP is belonging to Erebor
-response = requests.post('http://147.102.109.92:5005/submit', files=files, data={'json_data': json.dumps(json_info)})
+response = requests.post(initializer_url, files=files, data={'json_data': json.dumps(json_info)})
+
+print(f"Response from Initializer: {response.status_code})

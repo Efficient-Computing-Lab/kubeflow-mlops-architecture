@@ -102,7 +102,11 @@ def setup_train():
     subprocess.run(
         "conda run -n epos python epos/scripts/train.py --model=obj12",
         shell=True)
-    subprocess.run("cp -r /app/store/tf_models /trained_models/epos",shell=True)
+    model_version = "v1.0"
+    target_path = f"/trained_models/epos/{model_version}"
+    os.makedirs(target_path, exist_ok=True)
+    print(f"Directory '{path}' ensured to exist.")
+    subprocess.run("cp -r /app/store/tf_models /trained_models/epos/"+model_version,shell=True)
 # Define the pipeline
 @pipeline(name="epos-training")
 def epos_pipeline():

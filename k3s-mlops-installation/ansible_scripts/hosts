@@ -1,12 +1,12 @@
 [raspberrypies-workers]
-server2 ansible_host=147.102.19.164 ansible_user=rpi
-server3 ansible_host=147.102.19.162 ansible_user=rpi
-server4 ansible_host=147.102.19.166 ansible_user=rpi
-server5 ansible_host=147.102.19.167 ansible_user=rpi
-server6 ansible_host=147.102.19.168 ansible_user=rpi
+server2 ansible_host=<ip> ansible_user=rpi
+server3 ansible_host=<ip> ansible_user=rpi
+server4 ansible_host=<ip> ansible_user=rpi
+server5 ansible_host=<ip> ansible_user=rpi
+server6 ansible_host=<ip> ansible_user=rpi
 
 [raspberrypies-master]
-server1 ansible_host=147.102.19.163 ansible_user=rpi
+server1 ansible_host=<ip> ansible_user=rpi
 
 [local-machine]
-localhost ansible_connection=local ansible_user=giannis
+localhost ansible_connection=local ansible_user=<local_username>

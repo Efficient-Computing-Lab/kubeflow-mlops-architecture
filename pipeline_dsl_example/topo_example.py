@@ -29,6 +29,7 @@ def setup_train():
     import subprocess
     import yaml
     import requests
+    import os
 
     new_params_yaml ={
       "dataset": "carObj12",
@@ -90,10 +91,14 @@ def setup_train():
     # Save the dictionary to a YAML file
     with open('/app/store/tf_models/obj12/params.yml', 'w') as file:
         yaml.dump(new_params_yaml, file, default_flow_style=False)
-
-    subprocess.run("cp -r /datasets/epos/training_set /app/datasets/carObj12/",shell=True)
-    subprocess.run("mv /app/datasets/carObj12/training_set /app/datasets/carObj12/train_primesense",shell=True)
-
+    #subprocess.run("ls /datasets/epos", shell=True)
+    os.makedirs("/app/datasets/carObj12/train_primesense",exist_ok=True)
+    subprocess.run("ls /app/datasets/carObj12",shell=True)
+    subprocess.run("cp -r /datasets/epos/100_IndustryShapes/* /app/datasets/carObj12/train_primesense",shell=True)
+    subprocess.run("ls /app/datasets/carObj12/train_primesense/",shell=True)
+    #subprocess.run("ls /app/datasets/carObj12/train_primesense",shell=True)
+    #subprocess.run("mv /app/datasets/carObj12/ /app/datasets/carObj12/train_primesense",shell=True)
+    os.makedirs("/app/store/tf_data", exist_ok=True)
     # Run the command in a new shell
     subprocess.run("conda run -n epos python epos/scripts/create_example_list.py --dataset=carObj12 --split=train --split_type=primesense", shell=True)
     subprocess.run(
@@ -105,7 +110,6 @@ def setup_train():
     model_version = "v1.0"
     target_path = f"/trained_models/epos/{model_version}"
     os.makedirs(target_path, exist_ok=True)
-    print(f"Directory '{path}' ensured to exist.")
     subprocess.run("cp -r /app/store/tf_models /trained_models/epos/"+model_version,shell=True)
 # Define the pipeline
 @pipeline(name="epos-training")
@@ -131,14 +135,14 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "127"
+    "pipeline_version": "153"
 }
 # Create a multipart-encoded file
 files = {
-    'file': ('file.tar', open('pipeline.tar.gz', 'rb'), 'application/x-tar')
+    'file': ('file.tar.gz', open('pipeline.tar.gz', 'rb'), 'application/x-tar')
 }
 
 # Send the POST request to submit pipeline and initialize training phase
 response = requests.post(initializer_url, files=files, data={'json_data': json.dumps(json_info)})
 
-print(f"Response from Initializer: {response.status_code})
+print(f"Response from Initializer: {response.status_code}")

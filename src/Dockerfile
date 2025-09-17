@@ -76,13 +76,13 @@ ENV OSMESA_PREFIX=$REPO_PATH/external/osmesa
 ENV LLVM_PREFIX=$REPO_PATH/external/llvm
 #ENV CUDA_HOME=/usr/local/cuda-12.4
 
+COPY osmesa-install.sh $REPO_PATH/external/bop_renderer/omesa-install/
 RUN apt-get update && apt-get install -y zlib1g-dev autoconf build-essential pkgconf libtool
 RUN mkdir -p $OSMESA_PREFIX && \
     mkdir -p $LLVM_PREFIX && \
-    cd $REPO_PATH/external/bop_renderer/osmesa-install && \
     mkdir -p build &&\
     cd build && \
-    bash ../osmesa-install.sh
+    bash $REPO_PATH/external/bop_renderer/omesa-install/osmesa-install.sh
 RUN conda init bash && \
     . /root/.bashrc && \
     conda activate epos && \

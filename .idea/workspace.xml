@@ -5,9 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e20ef956-893b-406c-81e5-5c5dc5b5270e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/src/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset-registry/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/dataset-registry/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/initializer/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/initializer/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/ansible_scripts/hosts" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/ansible_scripts/hosts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/dataset-registry.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/master/dataset-registry.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/initializer.yaml.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/install.sh" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/master/install.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/kubeflow-install.sh" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/master/kubeflow-install.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/kyverno-install.sh" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/master/kyverno-install.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/model-distributor-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/master/model-distributor-deployment.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/master/nvidia-plugin-installation.sh" beforeDir="false" afterPath="$PROJECT_DIR$/k3s-mlops-installation/master/nvidia-plugin-installation.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/worker/master_ip_address.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/k3s-mlops-installation/worker/token" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.tar.gz" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.tar.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/pipeline.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline_dsl_example/topo_example.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/src/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +56,7 @@
     "Python.topo.executor": "Run",
     "Python.topo_example.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "/home/gkorod/kubeflow_mlops_architecture",
@@ -106,7 +122,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-4f4e415b4190-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.26053.29" />
+        <option value="bundled-python-sdk-8753aad8314d-d902c0275401-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-252.25557.178" />
       </set>
     </attachedChunks>
   </component>

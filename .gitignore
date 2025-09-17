@@ -1,2 +1,4 @@
 src/training_epos_Objs12.zip
 .idea
+worker/master_ip_address.txt
+worker/token

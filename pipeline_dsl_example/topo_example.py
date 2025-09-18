@@ -9,15 +9,20 @@ from kfp import kubernetes
 import tarfile
 import os
 
-from dotenv import load_dotenv # Import load_dotenv
+import argparse
 
-# Load environment variables from .env file
-load_dotenv()
-# Retrieve IP and Port from environment variables
-INITIALIZER_IP = os.getenv("INITIALIZER_IP")
-INITIALIZER_PORT = os.getenv("INITIALIZER_PORT")
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Provide Initializer IP and Port.")
+parser.add_argument("--initializer-ip", required=True, help="IP address of the Initializer")
+parser.add_argument("--initializer-port", required=True, help="Port of the Initializer")
+args = parser.parse_args()
+
+INITIALIZER_IP = args.initializer_ip
+INITIALIZER_PORT = args.initializer_port
+
+# Optional: sanity check
 if not INITIALIZER_IP or not INITIALIZER_PORT:
-    raise ValueError("INITIALIZER_IP and INITIALIZER_PORT environment variables must be set.")
+    raise ValueError("Initializer IP and Port must be provided as arguments.")
 
 # Construct the URL using environment variables
 initializer_url = f'http://{INITIALIZER_IP}:{INITIALIZER_PORT}/submit'

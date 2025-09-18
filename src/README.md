@@ -112,7 +112,9 @@ jobs:
           pip install kfp requests pyyaml kfp-kubernetes
 
       - name: Run pipeline script
-        run: python pipeline_dsl_example/topo_example.py
+        run: python pipeline_dsl_example/topo_example.py \
+              --initializer-ip ${{ secrets.INITIALIZER_IP }} \
+              --initializer-port ${{ secrets.INITIALIZER_PORT }}
 ```
 
 Before pushing code to the main branch, developers must update the pipeline version within 

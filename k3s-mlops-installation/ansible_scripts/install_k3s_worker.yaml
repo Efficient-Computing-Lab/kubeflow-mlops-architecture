@@ -1,28 +1,28 @@
 ---
 - name: Install K3s workers
-  hosts: raspberrypies-workers
+  hosts: workers
   become: yes
   tasks:
     - name: Create worker folder
       ansible.builtin.file:
-        path: /home/rpi/worker
+        path: /home/<worker_username>/worker
         state: directory
 
     - name: Copy K3s worker Installation script
       ansible.builtin.copy:
         src: ../worker/install.sh
-        dest: /home/rpi/worker/install.sh
+        dest: /home/<worker_username>/worker/install.sh
         mode: '0755'  # Ensure script has execute permissions
 
     - name: Copy K3s worker token
       ansible.builtin.copy:
         src: ../worker/token
-        dest: /home/rpi/worker/token
+        dest: /home/<worker_username>/worker/token
 
     - name: Copy master's IP address file
       ansible.builtin.copy:
         src: ../worker/master_ip_address.txt
-        dest: /home/rpi/worker/master_ip_address.txt
+        dest: /home/<worker_username>/worker/master_ip_address.txt
 
     - name: Execute Installation Script
-      ansible.builtin.shell: /home/rpi/worker/install.sh
+      ansible.builtin.shell: /home/<worker_username>/worker/install.sh

@@ -2,6 +2,8 @@
 
 Ansible should be installed in your local machine. All the ssh public keys should be also stored in your local machine. If this steps are already then installations can be performed successfully.
 
+All YAML files managed by Ansible contain placeholders that need to be replaced, and the same applies to the hosts file.
+
 ## Install K3s master
 
 The first step to install a K3s cluster is to install its master. In order to do so you should run the following playbook:
@@ -10,7 +12,7 @@ The first step to install a K3s cluster is to install its master. In order to do
 ansible-playbook -i hosts install_k3s_master.yaml -vvv
 ```
 
-This playbook executes the `master/install.sh` script on the Raspberry Pi defined as `raspberrypies-master` in the hosts file. The output of this script is the join token, which will be copied to your local machine within the `worker` folder.
+This playbook executes the `master/install.sh` script on the machine defined as `master` in the hosts file. The output of this script is the join token, which will be copied to your local machine within the `worker` folder.
 
 ## Install K3s workers
 
@@ -19,13 +21,13 @@ The second step is to setup K3s workers. To start the installation process use t
 ```bash
 ansible-playbook -i hosts install_k3s_workers.yaml -vvv
 ```
-This playbook executes the  `worker/install.sh` script on Raspberry Pies defined as `raspberrypies-workers` in the hosts file. The installation script uses the join-token retrieved from `master/install.sh` and the master's IP that is retrieved from the hosts file by your local machine.
+This playbook executes the  `worker/install.sh` script on machines defined as `workers` in the hosts file. The installation script uses the join-token retrieved from `master/install.sh` and the master's IP that is retrieved from the hosts file by your local machine.
 ## Install K3s Nvidia Plugin
 Afterwards, the Kubernetes Nvidia Plugin has to be installed. To start the installation process use the following playbook:
 ```bash
 ansible-playbook -i hosts install_k3s_nvidia_plugin.yaml -vvv
 ```
-This playbook executes the `master/nvidia-plugin-installation.sh` script on the Raspberry Pi defined as `raspberrypies-master` in the hosts file.
+This playbook executes the `master/nvidia-plugin-installation.sh` script on the machine defined as `master` in the hosts file.
 ## Install Kubeflow
 
 Then, Kubeflow should be installed in the K3s master. The purpose of Kubeflow is to perform MLOps. In order to do so you should run the following playbook:
@@ -33,7 +35,7 @@ Then, Kubeflow should be installed in the K3s master. The purpose of Kubeflow is
 ```bash
 ansible-playbook -i hosts install_kubeflow_master.yaml -vvv
 ```
-This playbook executes the `master/kubeflow-install.sh` script on the Raspberry Pi defined as `raspberrypies-master` in the hosts file.
+This playbook executes the `master/kubeflow-install.sh` script on the machine defined as `master` in the hosts file.
 
 # Install Kyverno
 
@@ -43,6 +45,6 @@ make nvidia GPUs accessible to pods that are under kubeflow namespace. In order 
 ```bash
 ansible-playbook -i hosts install_kyverno.yaml -vvv
 ```
-This playbook executes the `master/kyverno-install.sh` script on the Raspberry Pi defined as `raspberrypies-master` in the hosts file.
+This playbook executes the `master/kyverno-install.sh` script on the machine defined as `master` in the hosts file.
 
 

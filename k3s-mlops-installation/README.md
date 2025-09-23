@@ -8,7 +8,6 @@ Before executing any playbook from this repository, ensure the following:
 * Your local machine should have installed Ansible 4.10
 * Each host should have nvidia-smi pre-installed
 * Each host possesses a unique hostname. (Both hostnamectl and /etc/hosts/)
-* Each host contains the specified entries, cgroup_enable=memory cgroup_memory=1 cgroup_enable=cpuset, in /boot/cmdline.txt.
 * Each host should have ssh enabled and contain the public key of your local machine
 
 If not, please utilize hostnamectl to configure the hostname and edit `/etc/hosts`, as well as modify `/boot/cmdline.txt` to include the specified entries mentioned above.

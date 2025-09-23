@@ -1,16 +1,16 @@
 ---
 - name: Install Kubernetes Nvidia Plugin
-  hosts: raspberrypies-master
+  hosts: master
   become: yes
   tasks:
     - name: Create master folder
       ansible.builtin.file:
-        path: /home/rpi/master
+        path: /home/<master_username>/master
         state: directory
     - name: Copy Kubernetes Nvidia Plugin Installation script
       ansible.builtin.copy:
         src: ../master/nvidia-plugin-installation.sh
-        dest: /home/rpi/master/nvidia-plugin-installation.sh
+        dest: /home/<master_username>/master/nvidia-plugin-installation.sh
         mode: 0755  # Ensure script has execute permissions
     - name: Execute Installation Script
-      shell: /home/rpi/master/nvidia-plugin-installation.sh
+      shell: /home/<master_username>/master/nvidia-plugin-installation.sh

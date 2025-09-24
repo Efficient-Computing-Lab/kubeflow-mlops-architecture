@@ -98,9 +98,8 @@ def setup_train():
         yaml.dump(new_params_yaml, file, default_flow_style=False)
     #subprocess.run("ls /datasets/epos", shell=True)
     os.makedirs("/app/datasets/carObj12/train_primesense",exist_ok=True)
-    subprocess.run("ls /app/datasets/carObj12",shell=True)
-    subprocess.run("ls /app/datasets/epos/training_epos_Objs12", shell=True)
-    subprocess.run("ls /app/datasets/epos/training_epos_Objs12/training_set", shell=True)
+    subprocess.run("ls /datasets/epos/training_epos_Objs12", shell=True)
+    subprocess.run("ls /datasets/epos/training_epos_Objs12/training_set", shell=True)
     subprocess.run("cp -r /datasets/epos/training_training_epos_Objs12/training_set /app/datasets/carObj12/train_primesense",shell=True)
     subprocess.run("ls /app/datasets/carObj12/train_primesense/",shell=True)
     #subprocess.run("ls /app/datasets/carObj12/train_primesense",shell=True)
@@ -142,7 +141,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "163"
+    "pipeline_version": "164"
 }
 # Create a multipart-encoded file
 files = {

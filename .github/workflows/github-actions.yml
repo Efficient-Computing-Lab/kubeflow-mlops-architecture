@@ -26,3 +26,4 @@ jobs:
         run: python pipeline_dsl_example/topo_example.py \
               --initializer-ip ${{ secrets.INITIALIZER_IP }} \
               --initializer-port ${{ secrets.INITIALIZER_PORT }}
+

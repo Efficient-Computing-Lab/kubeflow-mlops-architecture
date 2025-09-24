@@ -20,7 +20,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install kfp==2.0.3 requests pyyaml kfp-kubernetes==1.8.4
+          pip install kfp==1.8.4 requests pyyaml kfp-kubernetes==1.8.4
 
       - name: Run pipeline script
         env:

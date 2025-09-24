@@ -28,7 +28,7 @@ if not INITIALIZER_IP or not INITIALIZER_PORT:
 initializer_url = f'http://{INITIALIZER_IP}:{INITIALIZER_PORT}/submit'
 
 @component(
-    base_image="gkorod/topo:v1.2", packages_to_install=["pyyaml"]
+    base_image="gkorod/topo:v1.1", packages_to_install=["pyyaml"]
 )
 def setup_train():
     import subprocess
@@ -99,7 +99,7 @@ def setup_train():
     #subprocess.run("ls /datasets/epos", shell=True)
     os.makedirs("/app/datasets/carObj12/train_primesense",exist_ok=True)
     subprocess.run("ls /app/datasets/carObj12",shell=True)
-    subprocess.run("cp -r /datasets/epos/100_IndustryShapes/* /app/datasets/carObj12/train_primesense",shell=True)
+    subprocess.run("cp -r /datasets/epos/training_training_epos_Objs12/* /app/datasets/carObj12/train_primesense",shell=True)
     subprocess.run("ls /app/datasets/carObj12/train_primesense/",shell=True)
     #subprocess.run("ls /app/datasets/carObj12/train_primesense",shell=True)
     #subprocess.run("mv /app/datasets/carObj12/ /app/datasets/carObj12/train_primesense",shell=True)
@@ -140,7 +140,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "159"
+    "pipeline_version": "160"
 }
 # Create a multipart-encoded file
 files = {

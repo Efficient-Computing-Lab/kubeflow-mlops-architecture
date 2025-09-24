@@ -26,7 +26,10 @@ jobs:
         env:
           INITIALIZER_IP: ${{ secrets.INITIALIZER_IP }}
           INITIALIZER_PORT: ${{ secrets.INITIALIZER_PORT }}
-        run: python pipeline_dsl_example/topo_example.py \
-              --initializer-ip "$INITIALIZER_IP" \
-              --initializer-port "$INITIALIZER_PORT"
+        run: |
+          export INITIALIZER_IP=${{ secrets.INITIALIZER_IP }}
+          export INITIALIZER_PORT=${{ secrets.INITIALIZER_PORT }}
+          python pipeline_dsl_example/topo_example.py \
+            --initializer-ip "$INITIALIZER_IP" \
+            --initializer-port "$INITIALIZER_PORT"
 

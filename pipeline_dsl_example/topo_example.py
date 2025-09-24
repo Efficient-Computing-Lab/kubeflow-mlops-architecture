@@ -28,7 +28,7 @@ if not INITIALIZER_IP or not INITIALIZER_PORT:
 initializer_url = f'http://{INITIALIZER_IP}:{INITIALIZER_PORT}/submit'
 
 @component(
-    base_image="gkorod/topo:v1.1", packages_to_install=["pyyaml"]
+    base_image="gkorod/topo:v1.1", packages_to_install=["pyyaml","kfp==2.7.0"]
 )
 def setup_train():
     import subprocess
@@ -141,7 +141,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "177"
+    "pipeline_version": "178"
 }
 # Create a multipart-encoded file
 files = {

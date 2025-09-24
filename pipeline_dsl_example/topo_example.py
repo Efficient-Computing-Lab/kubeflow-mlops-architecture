@@ -99,6 +99,8 @@ def setup_train():
     #subprocess.run("ls /datasets/epos", shell=True)
     os.makedirs("/app/datasets/carObj12/train_primesense",exist_ok=True)
     subprocess.run("ls /app/datasets/carObj12",shell=True)
+    subprocess.run("ls /app/datasets/epos/training_training_epos_Objs12", shell=True)
+    subprocess.run("ls /app/datasets/epos/training_training_epos_Objs12/training_set", shell=True)
     subprocess.run("cp -r /datasets/epos/training_training_epos_Objs12/training_set /app/datasets/carObj12/train_primesense",shell=True)
     subprocess.run("ls /app/datasets/carObj12/train_primesense/",shell=True)
     #subprocess.run("ls /app/datasets/carObj12/train_primesense",shell=True)

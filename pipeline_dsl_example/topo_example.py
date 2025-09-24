@@ -55,7 +55,7 @@ def setup_train():
       "freeze_regex_list": ["xception_65/entry_flow"],
       "initialize_last_layer": True,
       "fine_tune_batch_norm": False,
-      "train_steps": 15480,
+      "train_steps": 9000,
       "train_batch_size": 1,
       "base_learning_rate": 0.0000001,
       "learning_power": 0.9,
@@ -141,7 +141,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "173"
+    "pipeline_version": "174"
 }
 # Create a multipart-encoded file
 files = {

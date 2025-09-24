@@ -9,3 +9,5 @@ kubectl apply -f model-distributor-deployment.yaml
 kubectl expose -n kubeflow  deployment model-distributor --port=4443 --target-port=4443 --name=model-distributor-lb --type=LoadBalancer
 kubectl apply -f dataset-registry.yaml
 kubectl expose -n kubeflow  deployment dataset-registry --port=4422 --target-port=4422 --name=dataset-registry-lb --type=LoadBalancer
+kubectl apply -f initializer.yaml
+kubectl expose -n kubeflow  deployment initializer --port=5005 --target-port=5005 --name=initializer-lb --type=LoadBalancer

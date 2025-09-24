@@ -140,7 +140,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "155"
+    "pipeline_version": "156"
 }
 # Create a multipart-encoded file
 files = {

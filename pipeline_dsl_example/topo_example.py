@@ -41,7 +41,7 @@ def setup_train():
       "model_variant": "xception_65",
       "atrous_rates": [12, 24, 36],
       "encoder_output_stride": 16,
-      "decoder_output_stride": [8],
+      "decoder_output_stride": [4],
       "upsample_logits": False,
       "frag_seg_agnostic": False,
       "frag_loc_agnostic": False,
@@ -141,7 +141,7 @@ json_info = {
     "experiment": "experiment_test",
     "pipeline_name": "test",
     "job_name": "training_job",
-    "pipeline_version": "169"
+    "pipeline_version": "170"
 }
 # Create a multipart-encoded file
 files = {

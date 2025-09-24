@@ -22,5 +22,5 @@ spec:
           name: http
         env:
         - name: KUBEFLOW_IP
-          value: "147.102.19.169"
+          value: "147.102.109.92"
 

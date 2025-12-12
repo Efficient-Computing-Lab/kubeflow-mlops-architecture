@@ -15,8 +15,6 @@ beginning with basic manual approaches that leverage Docker and Kubernetes,
 and progressing to more advanced, automated methods using Kubeflow, 
 including its integration with GitHub Actions for a fully streamlined workflow.
 
-## Demo
-[![Demo Video](demo/final_kubeflow_v2.mp4)](demo/final_kubeflow_v2.mp4)
 
 ## Cite Us
 
